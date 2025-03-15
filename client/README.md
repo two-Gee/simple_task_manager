@@ -1,8 +1,6 @@
-# Vite & HeroUI Template
+# Task Together
 
-This is a template for creating applications using Vite and HeroUI (v2).
-
-[Try it on CodeSandbox](https://githubbox.com/frontio-ai/vite-template)
+This is simple Task Manager using Vite and HeroUI (v2).
 
 ## Technologies Used
 
@@ -18,7 +16,7 @@ This is a template for creating applications using Vite and HeroUI (v2).
 To clone the project, run the following command:
 
 ```bash
-git clone https://github.com/frontio-ai/vite-template.git
+git clone https://github.com/two-Gee/simple_task_manager.git
 ```
 
 ### Install dependencies
