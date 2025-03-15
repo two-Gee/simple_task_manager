@@ -1,16 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database(':memory:');
+const {db, initializeTables, initializeTestData} = require('./../initializeDatabase.js');
 
 // Initialize database
-db.serialize(() => {
-  db.run("CREATE TABLE lists (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)");
-  db.run("CREATE TABLE tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, due_date TEXT, completed BOOLEAN, locked_by INTEGER, lock_expiration INTEGER, list_id INTEGER)");
-  db.run("CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT)");
-  db.run("CREATE TABLE task_assignments (task_id INTEGER, user_id INTEGER, add_counter INTEGER, remove_counter INTEGER, PRIMARY KEY (task_id, user_id))");
-  db.run("CREATE TABLE list_users (list_id INTEGER, user_id INTEGER, PRIMARY KEY (list_id, user_id))");
-});
+initializeTables();
+initializeTestData();
 
 // Middleware to check if user is part of the list
 const checkUserInList = (req, res, next) => {
