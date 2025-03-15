@@ -24,17 +24,18 @@ const checkUserInList = (req, res, next) => {
 
 // Create a new list
 router.post('/lists', (req, res) => {
-  const { name, user_id } = req.body;
+  const name = req.body.name;
+  const user_id = req.body.user_id;
+  console.log("creating list: " + name + " for user: " + user_id);
   db.run("INSERT INTO lists (name) VALUES (?)", [name], function(err) {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    const newList = { id: this.lastID, name };
+    const newList = { id: this.lastID, name: name };
     db.run("INSERT INTO list_users (list_id, user_id) VALUES (?, ?)", [newList.id, user_id], function(err) {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
-      req.io.to(newList.id).emit('listAdded', newList);
       res.status(201).json(newList);
     });
   });
@@ -42,12 +43,14 @@ router.post('/lists', (req, res) => {
 
 // Get all lists
 router.get('/lists', (req, res) => {
-  db.all("SELECT * FROM lists", [], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(rows);
-  });
+    const user_id  = req.query.user_id;
+    console.log("getting lists for user: " + user_id);
+    db.all("SELECT lists.* FROM lists JOIN list_users ON lists.id = list_users.list_id WHERE list_users.user_id = ?", [user_id], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(rows);
+    });
 });
 
 // Assign a user to a list
@@ -178,18 +181,35 @@ router.post('/tasks/:id/unlock', checkUserInList, (req, res) => {
 });
 
 // User login
-router.post('/login', (req, res) => {
+router.post('/user/login', (req, res) => {
   const { username } = req.body;
+  console.log("logging in user: " + username);
   db.get("SELECT * FROM users WHERE username = ?", [username], (err, row) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
     if (row) {
-      res.status(200).json({ message: 'Login successful', user: row.username });
+      res.status(200).json(row);
     } else {
       res.status(401).json({ message: 'Invalid username' });
     }
   });
 });
+
+// User login
+router.post('/user/validate', (req, res) => {
+    const { id } = req.body;
+    console.log("validating user: " + id);
+    db.get("SELECT * FROM users WHERE id = ?", [id], (err, row) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        if (row) {
+            res.status(200).json(row);
+        } else {
+            res.status(401).json({ message: 'Invalid user' });
+        }
+    });
+  });
 
 module.exports = router;
