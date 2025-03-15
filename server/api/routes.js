@@ -9,187 +9,200 @@ initializeTestData();
 
 // Middleware to check if user is part of the list
 const checkUserInList = (req, res, next) => {
-  const { user_id } = req.body;
-  const list_id = req.params.id || req.body.list_id;
-  db.get("SELECT * FROM list_users WHERE list_id = ? AND user_id = ?", [list_id, user_id], (err, row) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    if (!row) {
-      return res.status(403).json({ message: 'User not authorized for this list' });
-    }
-    next();
-  });
+    const userId  = req.headers['userid'];
+    const listId = req.params.id || req.body.listId;
+    db.get("SELECT * FROM listUsers WHERE listId = ? AND userId = ?", [listId, userId], (err, row) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        if (!row) {
+            return res.status(403).json({ message: 'User not authorized for this list' });
+        }
+        next();
+    });
 };
 
 // Create a new list
 router.post('/lists', (req, res) => {
-  const { name, user_id } = req.body;
-  db.run("INSERT INTO lists (name) VALUES (?)", [name], function(err) {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    const newList = { id: this.lastID, name };
-    db.run("INSERT INTO list_users (list_id, user_id) VALUES (?, ?)", [newList.id, user_id], function(err) {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      req.io.to(newList.id).emit('listAdded', newList);
-      res.status(201).json(newList);
+    const { name, userId } = req.body;
+    db.run("INSERT INTO lists (name) VALUES (?)", [name], function(err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        const newList = { id: this.lastID, name };
+        db.run("INSERT INTO listUsers (listId, userId) VALUES (?, ?)", [newList.id, userId], function(err) {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+            req.io.to(newList.id).emit('listAdded', newList);
+            res.status(201).json(newList);
+        });
     });
-  });
 });
 
 // Get all lists
 router.get('/lists', (req, res) => {
-  db.all("SELECT * FROM lists", [], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(rows);
-  });
+    db.all("SELECT * FROM lists", [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(rows);
+    });
 });
 
 // Assign a user to a list
 router.post('/lists/:id/users', (req, res) => {
-  const { id } = req.params;
-  const { user_id } = req.body;
-  db.run("INSERT INTO list_users (list_id, user_id) VALUES (?, ?)", [id, user_id], function(err) {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    req.io.to(id).emit('userAssignedToList', { list_id: id, user_id });
-    res.status(201).json({ list_id: id, user_id });
-  });
+    const { id } = req.params;
+    const { userId } = req.body;
+    db.run("INSERT INTO listUsers (listId, userId) VALUES (?, ?)", [id, userId], function(err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        req.io.to(id).emit('userAssignedToList', { listId: id, userId });
+        res.status(201).json({ listId: id, userId });
+    });
 });
 
 // Create a new task
 router.post('/tasks', checkUserInList, (req, res) => {
-  const { title, due_date, assigned_to, list_id, user_id } = req.body;
-  db.run("INSERT INTO tasks (title, due_date, completed, locked_by, lock_expiration, list_id) VALUES (?, ?, ?, ?, ?, ?)", [title, due_date, false, null, null, list_id], function(err) {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    const newTask = { id: this.lastID, title, due_date, completed: false, locked_by: null, lock_expiration: null, list_id };
-    assigned_to.forEach(user_id => {
-      db.run("INSERT INTO task_assignments (task_id, user_id, add_counter, remove_counter) VALUES (?, ?, ?, ?)", [this.lastID, user_id, 1, 0]);
+    const { title, dueDate, listId, userId } = req.body;
+    db.run("INSERT INTO tasks (title, dueDate, completed, lockedBy, lockExpiration, listId) VALUES (?, ?, ?, ?, ?, ?)", [title, dueDate, false, null, null, listId], function(err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        const newTask = { id: this.lastID, title, dueDate, completed: false, lockedBy: null, lockExpiration: null, listId };
+        // assignedTo.forEach(userId => {
+        //     db.run("INSERT INTO taskAssignments (taskId, userId, addCounter, removeCounter) VALUES (?, ?, ?, ?)", [this.lastID, userId, 1, 0]);
+        // });
+        req.io.to(listId).emit('taskAdded', newTask);
+        res.status(201).json(newTask);
     });
-    req.io.to(list_id).emit('taskAdded', newTask);
-    res.status(201).json(newTask);
-  });
 });
 
 // Get all tasks
 router.get('/tasks', (req, res) => {
-  db.all("SELECT * FROM tasks", [], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(rows);
-  });
+    db.all("SELECT * FROM tasks", [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(rows);
+    });
 });
 
-// Get all tasks for a list
+// Get all tasks for a list along with assigned users
 router.get('/lists/:id/tasks', checkUserInList, (req, res) => {
-  const { id } = req.params;
-  db.all("SELECT * FROM tasks WHERE list_id = ?", [id], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(rows);
-  });
+    const listId = req.params.id;
+    db.all("SELECT * FROM tasks WHERE listId = ?", [listId], (err, tasks) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        const taskIds = tasks.map(task => task.id);
+        if (taskIds.length === 0) {
+            return res.json(tasks);
+        }
+        db.all(`SELECT ta.taskId, u.username FROM taskAssignments ta JOIN users u ON ta.userId = u.id WHERE ta.taskId IN (${taskIds.join(',')})`, [], (err, assignments) => {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+            const tasksWithUsers = tasks.map(task => {
+                task.assignedUsers = assignments.filter(assignment => assignment.taskId === task.id).map(assignment => assignment.username);
+                return task;
+            });
+            res.json(tasksWithUsers);
+        });
+    });
 });
 
 // Update a task
 router.put('/tasks/:id', checkUserInList, (req, res) => {
-  const { id } = req.params;
-  const { title, due_date, completed, locked_by, lock_expiration, list_id } = req.body;
-  db.run("UPDATE tasks SET title = ?, due_date = ?, completed = ?, locked_by = ?, lock_expiration = ?, list_id = ? WHERE id = ?", [title, due_date, completed, locked_by, lock_expiration, list_id, id], function(err) {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    const updatedTask = { id, title, due_date, completed, locked_by, lock_expiration, list_id };
-    req.io.to(list_id).emit('taskUpdated', updatedTask);
-    res.json(updatedTask);
-  });
+    const { id } = req.params;
+    const { title, dueDate, completed, lockedBy, lockExpiration, listId } = req.body;
+    db.run("UPDATE tasks SET title = ?, dueDate = ?, completed = ?, lockedBy = ?, lockExpiration = ?, listId = ? WHERE id = ?", [title, dueDate, completed, lockedBy, lockExpiration, listId, id], function(err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        const updatedTask = { id, title, dueDate, completed, lockedBy, lockExpiration, listId };
+        req.io.to(listId).emit('taskUpdated', updatedTask);
+        res.json(updatedTask);
+    });
 });
 
 // Delete a task
 router.delete('/tasks/:id', checkUserInList, (req, res) => {
-  const { id } = req.params;
-  db.run("DELETE FROM tasks WHERE id = ?", id, function(err) {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    req.io.emit('taskDeleted', id);
-    res.status(204).end();
-  });
+    const { id } = req.params;
+    db.run("DELETE FROM tasks WHERE id = ?", id, function(err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        req.io.emit('taskDeleted', id);
+        res.status(204).end();
+    });
 });
 
 // Mark a task as completed
 router.post('/tasks/:id/complete', checkUserInList, (req, res) => {
-  const { id } = req.params;
-  db.run("UPDATE tasks SET completed = ? WHERE id = ?", [true, id], function(err) {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    req.io.emit('taskCompleted', { task_id: id });
-    res.json({ task_id: id });
-  });
+    const { id } = req.params;
+    db.run("UPDATE tasks SET completed = ? WHERE id = ?", [true, id], function(err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        req.io.emit('taskCompleted', { taskId: id });
+        res.json({ taskId: id });
+    });
 });
 
 // Assign a task to a user
 router.post('/tasks/:id/assign', checkUserInList, (req, res) => {
-  const { id } = req.params;
-  const { user_id } = req.body;
-  db.run("INSERT INTO task_assignments (task_id, user_id, add_counter, remove_counter) VALUES (?, ?, ?, ?)", [id, user_id, 1, 0], function(err) {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    req.io.emit('taskAssigned', { task_id: id, user_id });
-    res.status(201).json({ task_id: id, user_id });
-  });
+    const { id } = req.params;
+    const { userId } = req.body;
+    db.run("INSERT INTO taskAssignments (taskId, userId, addCounter, removeCounter) VALUES (?, ?, ?, ?)", [id, userId, 1, 0], function(err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        req.io.emit('taskAssigned', { taskId: id, userId });
+        res.status(201).json({ taskId: id, userId });
+    });
 });
 
 // Lock a task for editing
 router.post('/tasks/:id/lock', checkUserInList, (req, res) => {
-  const { id } = req.params;
-  const { user_id } = req.body;
-  const lock_expiration = Date.now() + 300000; // 5 minutes lock
-  db.run("UPDATE tasks SET locked_by = ?, lock_expiration = ? WHERE id = ?", [user_id, lock_expiration, id], function(err) {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    req.io.emit('taskLocked', { task_id: id, user_id, lock_expiration });
-    res.json({ task_id: id, user_id, lock_expiration });
-  });
+    const { id } = req.params;
+    const { userId } = req.body;
+    const lockExpiration = Date.now() + 300000; // 5 minutes lock
+    db.run("UPDATE tasks SET lockedBy = ?, lockExpiration = ? WHERE id = ?", [userId, lockExpiration, id], function(err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        req.io.emit('taskLocked', { taskId: id, userId, lockExpiration });
+        res.json({ taskId: id, userId, lockExpiration });
+    });
 });
 
 // Unlock a task
 router.post('/tasks/:id/unlock', checkUserInList, (req, res) => {
-  const { id } = req.params;
-  db.run("UPDATE tasks SET locked_by = ?, lock_expiration = ? WHERE id = ?", [null, null, id], function(err) {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    req.io.emit('taskUnlocked', { task_id: id });
-    res.json({ task_id: id });
-  });
+    const { id } = req.params;
+    db.run("UPDATE tasks SET lockedBy = ?, lockExpiration = ? WHERE id = ?", [null, null, id], function(err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        req.io.emit('taskUnlocked', { taskId: id });
+        res.json({ taskId: id });
+    });
 });
 
 // User login
 router.post('/login', (req, res) => {
-  const { username } = req.body;
-  db.get("SELECT * FROM users WHERE username = ?", [username], (err, row) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    if (row) {
-      res.status(200).json({ message: 'Login successful', user: row.username });
-    } else {
-      res.status(401).json({ message: 'Invalid username' });
-    }
-  });
+    const { username } = req.body;
+    db.get("SELECT * FROM users WHERE username = ?", [username], (err, row) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        if (row) {
+            res.status(200).json({ message: 'Login successful', user: row.username });
+        } else {
+            res.status(401).json({ message: 'Invalid username' });
+        }
+    });
 });
 
 module.exports = router;
