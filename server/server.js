@@ -1,11 +1,15 @@
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
-const tasksRouter = require('./api/routes.js');
+const express = require("express");
+const http = require("http");
+const socketIo = require("socket.io");
+const tasksRouter = require("./api/routes.js");
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = socketIo(server, {
+  cors: {
+    origin: "http://localhost:5173",
+  },
+});
 
 // Middleware
 app.use(express.json());
@@ -16,24 +20,24 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/api', tasksRouter);
+app.use("/api", tasksRouter);
 
 // WebSocket connection
-io.on('connection', (socket) => {
-  console.log('New client connected');
+io.on("connection", (socket) => {
+  console.log("New client connected: " + socket.id);
 
-  socket.on('joinList', (listId) => {
+  socket.on("joinList", (listId) => {
     socket.join(listId);
     console.log(`Client joined list ${listId}`);
   });
 
-  socket.on('leaveList', (listId) => {
+  socket.on("leaveList", (listId) => {
     socket.leave(listId);
     console.log(`Client left list ${listId}`);
   });
 
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
+  socket.on("disconnect", () => {
+    console.log("Client disconnected: " + socket.id);
   });
 });
 
