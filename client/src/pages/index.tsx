@@ -1,5 +1,16 @@
 import { title, subtitle } from "@/components/primitives";
 import DefaultLayout from "@/layouts/default";
+import { io } from 'socket.io-client';
+
+const socket = io("http://localhost:3000");
+
+socket.on('connect', () => {
+  console.log('Connected to server');
+});
+
+export function emitEvent(eventName: string, data: any) {
+  socket.emit(eventName, data);
+}
 
 export default function IndexPage() {
   return (
