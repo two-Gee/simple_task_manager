@@ -19,8 +19,6 @@ export default function IndexPage() {
   const [newListName, setNewListName] = useState('');
 
   useEffect(() => {
-    // Replace with the actual user_id
-
     // Fetch lists assigned to the user
     fetch('http://localhost:4000/api/lists?user_id=' + user_id.toString(), {
       method: 'GET',
