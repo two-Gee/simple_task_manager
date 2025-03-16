@@ -2,22 +2,23 @@ import { useState } from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Checkbox } from "@heroui/checkbox";
 import { Chip } from "@heroui/chip";
-
-import { TaskData } from "@/pages/list";
+import { formatDate } from "@/utils/dateFormatter";
 
 interface TaskProps {
+  id: number;
   title: string;
   dueDate?: string;
   completed?: boolean;
   assignedUsers?: string[];
-  openEditor: (taskData: TaskData) => void;
+  openEditor: () => void;
 }
 
 export const Task = ({
+  id,
   title,
   dueDate,
   completed = false,
-  assignedUsers,
+  assignedUsers = [],
   openEditor,
 }: TaskProps) => {
   const [isCompleted, setIsCompleted] = useState(completed);
@@ -27,12 +28,7 @@ export const Task = ({
       <Card className="h-20">
         <CardBody
           onClick={() => {
-            openEditor({
-              title,
-              dueDate,
-              completed: isCompleted,
-              assignedUsers,
-            });
+            openEditor();
           }}
         >
           <div className="flex flex-row justify-between items-center gap-4">
@@ -47,7 +43,7 @@ export const Task = ({
                 <span className="text-base">{title}</span>
               </Checkbox>
               <span className="text-xs text-default-500 ml-7">
-                {dueDate ? <>Due: {dueDate}</> : <>No due date</>}
+                {dueDate ? <>Due: {formatDate(dueDate)}</> : <>No due date</>}
               </span>
             </div>
 
