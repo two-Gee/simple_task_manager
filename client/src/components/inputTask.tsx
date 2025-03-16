@@ -30,7 +30,7 @@ export const InputTask = ({ listId, setTasks, tasks }: InputTaskProps) => {
     setIsLoading(true);
 
     const data = Object.fromEntries(new FormData(event.currentTarget));
-    console.log("create task", data+" for room "+listId);
+
     await fetch(`http://localhost:4000/api/tasks`, {
       method: "POST",
       headers: {

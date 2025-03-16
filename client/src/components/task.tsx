@@ -54,8 +54,8 @@ export const Task = ({
                 <div className="flex flex-row gap-1">
                   {assignedUsers.map((user, index) => {
                     const colors = [
-                      "primary",
                       "secondary",
+                      "primary",
                       "success",
                       "warning",
                       "danger",
