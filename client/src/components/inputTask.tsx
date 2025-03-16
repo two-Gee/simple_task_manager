@@ -31,7 +31,7 @@ export const InputTask = ({ listId, setTasks, tasks }: InputTaskProps) => {
 
     const data = Object.fromEntries(new FormData(event.currentTarget));
 
-    await fetch(`http://localhost:4000/api/tasks`, {
+    await fetch(`http://localhost:4000/api/lists/${listId}/tasks`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -40,7 +40,6 @@ export const InputTask = ({ listId, setTasks, tasks }: InputTaskProps) => {
       body: JSON.stringify({
         title: data.title,
         dueDate: data.dueDate,
-        listId: listId,
       }),
     })
       .then((response) => response.json())
