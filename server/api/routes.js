@@ -34,7 +34,6 @@ router.post('/lists', (req, res) => {
             if (err) {
                 return res.status(500).json({ error: err.message });
             }
-            req.io.to(newList.id).emit('listAdded', newList);
             res.status(201).json(newList);
         });
     });
@@ -42,7 +41,9 @@ router.post('/lists', (req, res) => {
 
 // Get all lists
 router.get('/lists', (req, res) => {
-    db.all("SELECT * FROM lists", [], (err, rows) => {
+    const userId  = req.query.userId;
+    console.log("getting lists for user: " + userId);
+    db.all("SELECT lists.* FROM lists JOIN list_users ON lists.id = list_users.list_id WHERE list_users.user_id = ?", [userId], (err, rows) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
@@ -191,18 +192,35 @@ router.post('/tasks/:id/unlock', checkUserInList, (req, res) => {
 });
 
 // User login
-router.post('/login', (req, res) => {
-    const { username } = req.body;
-    db.get("SELECT * FROM users WHERE username = ?", [username], (err, row) => {
+router.post('/user/login', (req, res) => {
+  const { username } = req.body;
+  console.log("logging in user: " + username);
+  db.get("SELECT * FROM users WHERE username = ?", [username], (err, row) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (row) {
+      res.status(200).json(row);
+    } else {
+      res.status(401).json({ message: 'Invalid username' });
+    }
+  });
+});
+
+// User login
+router.post('/user/validate', (req, res) => {
+    const { id } = req.body;
+    console.log("validating user: " + id);
+    db.get("SELECT * FROM users WHERE id = ?", [id], (err, row) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
         if (row) {
-            res.status(200).json({ message: 'Login successful', user: row.username });
+            res.status(200).json(row);
         } else {
-            res.status(401).json({ message: 'Invalid username' });
+            res.status(401).json({ message: 'Invalid user' });
         }
     });
-});
+  });
 
 module.exports = router;
