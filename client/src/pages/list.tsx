@@ -11,8 +11,7 @@ import { TaskEditor } from "@/components/taskEditor";
 import { InputTask } from "@/components/inputTask";
 import { PlusIcon } from "@/components/icons";
 import { useClickOutside } from "@/hooks/useClickOutside";
-
-const socket = io("http://localhost:4000");
+import { socket } from "@/socket";
 
 export type TaskData = {
   id: number;
