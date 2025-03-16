@@ -11,8 +11,10 @@ import clsx from "clsx";
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { Logo } from "./icons";
+import AddUser from "./addUser";
+import { useLocation } from "react-router-dom";
 export const Navbar = () => {
-
+  const location = useLocation(); // Use useLocation to get the current route
   return (
     <HeroUINavbar maxWidth="full" position="sticky">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
@@ -44,6 +46,11 @@ export const Navbar = () => {
         <NavbarItem className="hidden sm:flex gap-2">
           <ThemeSwitch />
         </NavbarItem>
+        {location.pathname === "/docs" && ( // Conditionally render AddUser based on the route
+          <NavbarItem className="hidden sm:flex gap-2">
+            <AddUser />
+          </NavbarItem>
+        )}
       </NavbarContent>
     </HeroUINavbar>
   );
