@@ -6,7 +6,7 @@ import { Listbox, ListboxItem, Form, Button, Input, Divider } from "@heroui/reac
 import AddIcon from '@mui/icons-material/Add';
 
 const socket = io("http://localhost:4000");
-const user_id = 1;
+const userId = 1;
 
 export const ListboxWrapper = ({children}) => (
   <div className="w-full max-w-[260px] border-small px-1 py-2 rounded-small border-default-200 dark:border-default-100">
@@ -20,7 +20,7 @@ export default function IndexPage() {
 
   useEffect(() => {
     // Fetch lists assigned to the user
-    fetch('http://localhost:4000/api/lists?user_id=' + user_id.toString(), {
+    fetch('http://localhost:4000/api/lists?userId=' + userId.toString(), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -41,7 +41,7 @@ export default function IndexPage() {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ name: newListName, user_id })
+      body: JSON.stringify({ name: newListName, userId })
     })
     .then(response => response.json())
     .then(data => {

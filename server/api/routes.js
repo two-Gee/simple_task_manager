@@ -43,7 +43,7 @@ router.post('/lists', (req, res) => {
 router.get('/lists', (req, res) => {
     const userId  = req.query.userId;
     console.log("getting lists for user: " + userId);
-    db.all("SELECT lists.* FROM lists JOIN list_users ON lists.id = list_users.list_id WHERE list_users.user_id = ?", [userId], (err, rows) => {
+    db.all("SELECT lists.* FROM lists JOIN listUsers ON lists.id = listUsers.listId WHERE listUsers.userId = ?", [userId], (err, rows) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
