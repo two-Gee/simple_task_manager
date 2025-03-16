@@ -17,6 +17,7 @@ const initializeTestData = () => {
     db.serialize(() => {
     db.run("INSERT INTO users (username) VALUES ('user1')");
     db.run("INSERT INTO users (username) VALUES ('user2')");
+    db.run("INSERT INTO users (username) VALUES ('user3')");
     db.run("INSERT INTO lists (name) VALUES ('List 1')");
     db.run("INSERT INTO lists (name) VALUES ('List 2')");
     db.run("INSERT INTO list_users (list_id, user_id) VALUES (1, 1)");
