@@ -36,7 +36,7 @@ export default function ListPage({ listId = 1 }) {
 
   useEffect(() => {
     // Join the room with the listId
-    socket.emit("joinList", listId.toString());
+    socket.emit("joinList", listId);
 
     // Fetch all tasks for the list
     fetch(`http://localhost:4000/api/lists/${listId}/tasks`, {
