@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useDisclosure } from "@heroui/react";
-import { io } from "socket.io-client";
 import { Card, CardBody } from "@heroui/card";
 import { Input } from "@heroui/input";
+import Cookies from "js-cookie";
 
 import { title } from "@/components/primitives";
 import { Task } from "@/components/task";
@@ -35,32 +35,24 @@ export default function ListPage({ listId = 1 }) {
 
   useEffect(() => {
     // Join the room with the listId
-    socket.emit("joinList", listId);
+    socket.emit("joinList", listId.toString());
 
-    // Fetch all tasks for the list
-    fetch(`http://localhost:4000/api/lists/${listId}/tasks`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        userId: "1",
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        setTasks(data);
-      })
-      .catch((error) => console.error("Error fetching tasks:", error));
+    fetchData();
 
     // Listen for taskAdded event
     socket.on("taskAdded", (newTask) => {
       setTasks((prevTasks) => [...prevTasks, newTask]);
     });
 
+    socket.on("taskCompleted", ({ taskId }) => {
+      setTasks((prevTasks) => setTaskCompleted(prevTasks, taskId));
+    });
+
     // Cleanup on component unmount
     return () => {
       socket.emit("leaveList", listId);
       socket.off("taskAdded");
+      socket.off("taskCompleted");
     };
   }, [listId]);
 
@@ -68,6 +60,32 @@ export default function ListPage({ listId = 1 }) {
     setSelectedTask(task);
     onOpen();
   };
+
+  const fetchData = () => {
+    // Fetch all tasks for the list
+    fetch(`http://localhost:4000/api/lists/${listId}/tasks`, {
+      method: "GET",
+      headers: new Headers({
+        "Content-Type": "application/json",
+        userId: Cookies.get("userId") || "",
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setTasks(data);
+      })
+      .catch((error) => console.error("Error fetching tasks:", error));
+  };
+
+  function setTaskCompleted(tasks: TaskData[], taskId: string) {
+    var tasksNew = tasks.map((task) =>
+      task.id.toString() === taskId
+        ? { ...task, completed: !task.completed }
+        : task
+    );
+
+    return tasksNew;
+  }
 
   return (
     <DefaultLayout>
@@ -80,8 +98,10 @@ export default function ListPage({ listId = 1 }) {
             <Task
               key={task.id}
               assignedUsers={task.assignedUsers}
+              completed={task.completed}
               dueDate={task.dueDate}
               id={task.id}
+              listId={listId}
               openEditor={() => handleOpenEditor(task)}
               title={task.title}
             />

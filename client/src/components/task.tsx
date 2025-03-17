@@ -1,7 +1,8 @@
-import { useState } from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Checkbox } from "@heroui/checkbox";
 import { Chip } from "@heroui/chip";
+import Cookies from "js-cookie";
+
 import { formatDate } from "@/utils/dateFormatter";
 
 interface TaskProps {
@@ -11,6 +12,7 @@ interface TaskProps {
   completed?: boolean;
   assignedUsers?: string[];
   openEditor: () => void;
+  listId: number;
 }
 
 export const Task = ({
@@ -20,8 +22,17 @@ export const Task = ({
   completed = false,
   assignedUsers = [],
   openEditor,
+  listId,
 }: TaskProps) => {
-  const [isCompleted, setIsCompleted] = useState(completed);
+  const handleTaskCompletion = () => {
+    fetch(`http://localhost:4000/api/lists/${listId}/tasks/${id}/complete`, {
+      method: "POST",
+      headers: new Headers({
+        "Content-Type": "application/json",
+        userId: Cookies.get("userId") || "",
+      }),
+    }).catch((error) => console.error("Error posting task:", error));
+  };
 
   return (
     <div className="w-5/6">
@@ -37,8 +48,8 @@ export const Task = ({
               <Checkbox
                 lineThrough
                 color="secondary"
-                isSelected={isCompleted}
-                onValueChange={setIsCompleted}
+                isSelected={completed}
+                onChange={() => handleTaskCompletion()}
               >
                 <span className="text-base">{title}</span>
               </Checkbox>
