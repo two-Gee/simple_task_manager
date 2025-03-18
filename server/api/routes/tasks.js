@@ -32,7 +32,7 @@ router.post("/:listId/tasks/", checkUserInList, (req, res) => {
   );
 });
 
-// Get all tasks for a list along with assigned users
+// Get all tasks for a list along with assigned users and lock status
 router.get("/:listId/tasks/", checkUserInList, (req, res) => {
   const listId = req.params.listId;
   console.log("getting tasks for list: " + listId);
@@ -57,6 +57,7 @@ router.get("/:listId/tasks/", checkUserInList, (req, res) => {
           task.assignedUsers = assignments
             .filter((assignment) => assignment.taskId === task.id)
             .map((assignment) => assignment.username);
+          task.isLocked = task.lockedBy !== null && (task.lockExpiration * 1000) > Date.now();
           return task;
         });
         res.json(tasksWithUsers);

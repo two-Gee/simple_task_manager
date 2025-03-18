@@ -22,6 +22,7 @@ export type TaskData = {
   dueDate?: string;
   completed?: boolean;
   assignedUsers?: string[];
+  isLocked: boolean;
 };
 
 export default function ListPage() {
@@ -82,6 +83,7 @@ export default function ListPage() {
       .then((response) => response.json())
       .then((data) => {
         setTasks(data);
+        console.log("Tasks:", data);
         setLoading(false);
       })
       .catch((error) => console.error("Error fetching tasks:", error));
@@ -118,6 +120,7 @@ export default function ListPage() {
                   listId={listId}
                   openEditor={() => handleOpenEditor(task)}
                   title={task.title}
+                  isLocked={task.isLocked}
                 />
               </div>
             ))

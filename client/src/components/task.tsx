@@ -1,6 +1,7 @@
 import { Card, CardBody } from "@heroui/card";
 import { Checkbox } from "@heroui/checkbox";
 import { Chip } from "@heroui/chip";
+import { addToast } from "@heroui/react";
 import Cookies from "js-cookie";
 
 import { formatDate } from "@/utils/dateFormatter";
@@ -13,9 +14,10 @@ interface TaskProps {
   assignedUsers?: string[];
   openEditor: () => void;
   listId: number;
+  isLocked: boolean;
 }
 
-export const Task = ({ id, title, dueDate, completed = false, assignedUsers = [], openEditor, listId }: TaskProps) => {
+export const Task = ({ id, title, dueDate, completed = false, assignedUsers = [], openEditor, listId, isLocked }: TaskProps) => {
   const handleTaskCompletion = () => {
     fetch(`http://localhost:4000/api/lists/${listId}/tasks/${id}/complete`, {
       method: "POST",
@@ -30,7 +32,16 @@ export const Task = ({ id, title, dueDate, completed = false, assignedUsers = []
     <Card className="h-20">
       <CardBody
         onClick={() => {
-          openEditor();
+          if(isLocked){
+            addToast({
+              title: "Task is locked",
+              description: "You cannot edit this task",
+              color: "danger",
+            });
+          }else{
+            openEditor();
+          }
+
         }}
       >
         <div className="flex flex-row justify-between items-center gap-4">
