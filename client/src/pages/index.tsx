@@ -1,8 +1,8 @@
 import { title, subtitle } from "@/components/primitives";
 import DefaultLayout from "@/layouts/default";
-import { useEffect, useState, useRef } from 'react';
-import {  Input, Card, CardBody, addToast} from "@heroui/react";
-import AddIcon from '@mui/icons-material/Add';
+import { useEffect, useState, useRef } from "react";
+import { Input, Card, CardBody, addToast } from "@heroui/react";
+import AddIcon from "@mui/icons-material/Add";
 import { ListComponent } from "@/components/listComponent";
 import { CreateListComponent } from "@/components/createListComponent";
 import { socket } from "@/socket";
@@ -14,7 +14,7 @@ export type ListData = {
   isShared: boolean;
 };
 
-export const ListboxWrapper = ({children}) => (
+export const ListboxWrapper = ({ children }) => (
   <div className="w-full max-w-[260px] border-small px-1 py-2 rounded-small border-default-200 dark:border-default-100">
     {children}
   </div>
@@ -22,45 +22,43 @@ export const ListboxWrapper = ({children}) => (
 
 export default function IndexPage() {
   const [lists, setLists] = useState<ListData[]>([]);
-  const [newListName, setNewListName] = useState('');
+  const [newListName, setNewListName] = useState("");
   const [isInputOpen, setIsInputOpen] = useState(false);
   const inputRef = useRef<HTMLDivElement>(null);
-  const [userId, setUserId] = useState<string | undefined>(Cookies.get('userId'))
+  const [userId, setUserId] = useState<string | undefined>(Cookies.get("userId"));
 
   useEffect(() => {
-    setUserId(Cookies.get('userId'));
-    socket.emit('joinList', userId);
+    setUserId(Cookies.get("userId"));
+    socket.emit("joinList", userId);
 
-    socket.on('assignedToList', (newList) => {
-      console.log('Assigned to new list:', newList);
+    socket.on("assignedToList", (newList) => {
+      console.log("Assigned to new list:", newList);
       setLists((prevLists) => [...prevLists, newList]);
       addToast({
         title: "Added to new list",
         description: "You have been added to the list: " + newList.name,
-        color: 'success',
+        color: "success",
       });
-    })
+    });
     // Fetch lists assigned to the user
-    fetch('http://localhost:4000/api/lists', {
-      method: 'GET',
+    fetch("http://localhost:4000/api/lists", {
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
-        'userId': userId || ''
-      }
+        "Content-Type": "application/json",
+        userId: userId || "",
+      },
     })
-    .then(response => response.json())
-    .then(data => {
-      console.log('Lists:', data);
-      setLists(data);
-    })
-    .catch(error => console.error('Error fetching lists:', error));
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Lists:", data);
+        setLists(data);
+      })
+      .catch((error) => console.error("Error fetching lists:", error));
     return () => {
-      socket.off('assignedToList');
-      socket.off('joinList');
+      socket.off("assignedToList");
+      socket.off("joinList");
     };
   }, []);
-
-
 
   return (
     <DefaultLayout>
@@ -68,14 +66,17 @@ export default function IndexPage() {
         <div className="inline-block max-w-lg text-center justify-center">
           <span className={title()}>Task&nbsp;</span>
           <span className={title({ color: "violet" })}>Together&nbsp;</span>
-          <div className={subtitle({ class: "mt-4" })}>
+          <div
+            className={subtitle({
+              class: "mt-4",
+            })}
+          >
             A Simple Task Manager.
           </div>
         </div>
-        {lists.map(list => (
+        {lists.map((list) => (
           <ListComponent key={list.id} id={list.id} name={list.name} isShared={list.isShared} />
         ))}
-        
       </section>
       <section className="flex flex-col items-center py-8 md:py-10">
         {isInputOpen ? (
@@ -84,16 +85,11 @@ export default function IndexPage() {
           </div>
         ) : (
           <Card className="w-5/6">
-            <CardBody
-              className="flex flex-col gap-6"
-              onClick={() => setIsInputOpen(true) }
-            >
+            <CardBody className="flex flex-col gap-6" onClick={() => setIsInputOpen(true)}>
               <Input
                 isReadOnly
                 placeholder="Add a new List"
-                startContent={
-                  <AddIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
-                }
+                startContent={<AddIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />}
                 type="text"
                 variant="faded"
               />

@@ -21,10 +21,7 @@ export const InputTask = ({ listId, setTasks, tasks }: InputTaskProps) => {
   const [dueDate, setDueDate] = useState<DateValue | null>(null);
   //   const Cookies = require("js-cookie");
 
-  const onSubmit = async (event: {
-    preventDefault: () => void;
-    currentTarget: HTMLFormElement | undefined;
-  }) => {
+  const onSubmit = async (event: { preventDefault: () => void; currentTarget: HTMLFormElement | undefined }) => {
     event.preventDefault();
 
     setIsLoading(true);
@@ -35,7 +32,7 @@ export const InputTask = ({ listId, setTasks, tasks }: InputTaskProps) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "userId": "1", //Cookies.get("userId"),
+        userId: "1", //Cookies.get("userId"),
       },
       body: JSON.stringify({
         title: data.title,
@@ -67,9 +64,7 @@ export const InputTask = ({ listId, setTasks, tasks }: InputTaskProps) => {
               labelPlacement="outside"
               name="title"
               placeholder="Add a new Task"
-              startContent={
-                <PlusIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
-              }
+              startContent={<PlusIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />}
               type="text"
               value={title}
               variant="faded"
@@ -88,13 +83,7 @@ export const InputTask = ({ listId, setTasks, tasks }: InputTaskProps) => {
             />
           </div>
           <div className="flex justify-center w-full">
-            <Button
-              className="w-1/6"
-              color="secondary"
-              isLoading={isLoading}
-              type="submit"
-              variant="solid"
-            >
+            <Button className="w-1/6" color="secondary" isLoading={isLoading} type="submit" variant="solid">
               Submit
             </Button>
           </div>

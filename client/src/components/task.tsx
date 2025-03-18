@@ -15,15 +15,7 @@ interface TaskProps {
   listId: number;
 }
 
-export const Task = ({
-  id,
-  title,
-  dueDate,
-  completed = false,
-  assignedUsers = [],
-  openEditor,
-  listId,
-}: TaskProps) => {
+export const Task = ({ id, title, dueDate, completed = false, assignedUsers = [], openEditor, listId }: TaskProps) => {
   const handleTaskCompletion = () => {
     fetch(`http://localhost:4000/api/lists/${listId}/tasks/${id}/complete`, {
       method: "POST",
@@ -44,12 +36,7 @@ export const Task = ({
         <div className="flex flex-row justify-between items-center gap-4">
           {/* Left side: checkbox, title, and due date */}
           <div className="flex flex-col gap-2">
-            <Checkbox
-              lineThrough
-              color="secondary"
-              isSelected={completed}
-              onChange={() => handleTaskCompletion()}
-            >
+            <Checkbox lineThrough color="secondary" isSelected={completed} onChange={() => handleTaskCompletion()}>
               <span className="text-base">{title}</span>
             </Checkbox>
             <span className="text-xs text-default-500 ml-7">
@@ -63,13 +50,7 @@ export const Task = ({
               <span className="text-sm">Assigned users:</span>
               <div className="flex flex-row gap-1">
                 {assignedUsers.map((user, index) => {
-                  const colors = [
-                    "secondary",
-                    "primary",
-                    "success",
-                    "warning",
-                    "danger",
-                  ];
+                  const colors = ["secondary", "primary", "success", "warning", "danger"];
                   const color = colors[index % colors.length] as
                     | "primary"
                     | "secondary"

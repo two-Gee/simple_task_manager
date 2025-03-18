@@ -89,9 +89,7 @@ export default function ListPage() {
 
   function setTaskCompleted(tasks: TaskData[], taskId: string) {
     var tasksNew = tasks.map((task) =>
-      task.id.toString() === taskId
-        ? { ...task, completed: !task.completed }
-        : task
+      task.id.toString() === taskId ? { ...task, completed: !task.completed } : task,
     );
 
     return tasksNew;
@@ -104,13 +102,7 @@ export default function ListPage() {
           <h1 className={title()}>{listName}</h1>
         </div>
         {!tasks && loading && (
-          <Spinner
-            className="mt-12"
-            color="secondary"
-            label="Loading tasks..."
-            size="lg"
-            variant="gradient"
-          />
+          <Spinner className="mt-12" color="secondary" label="Loading tasks..." size="lg" variant="gradient" />
         )}
         {tasks && tasks.filter((task) => !task.completed).length !== 0 ? (
           tasks
@@ -131,12 +123,7 @@ export default function ListPage() {
             ))
         ) : (
           <>
-            <Image
-              alt="Image with delay"
-              height={180}
-              src="/noTasks.svg"
-              width={150}
-            />
+            <Image alt="Image with delay" height={180} src="/noTasks.svg" width={150} />
             <span className="text-lg font-medium">All done!</span>
           </>
         )}
@@ -145,11 +132,7 @@ export default function ListPage() {
         <section className="flex flex-col items-center justify-center ">
           <div className="w-5/6">
             <Accordion className="w-full pb-5" variant="light">
-              <AccordionItem
-                key="1"
-                aria-label="Completed tasks"
-                title="Completed Tasks"
-              >
+              <AccordionItem key="1" aria-label="Completed tasks" title="Completed Tasks">
                 <div className="flex flex-col items-center gap-4 w-full">
                   {tasks &&
                     tasks
@@ -181,16 +164,11 @@ export default function ListPage() {
           </div>
         ) : (
           <Card className="w-5/6">
-            <CardBody
-              className="flex flex-col gap-6"
-              onClick={() => setIsInputOpen(true)}
-            >
+            <CardBody className="flex flex-col gap-6" onClick={() => setIsInputOpen(true)}>
               <Input
                 isReadOnly
                 placeholder="Add a new Task"
-                startContent={
-                  <PlusIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
-                }
+                startContent={<PlusIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />}
                 type="text"
                 variant="faded"
               />
@@ -200,11 +178,7 @@ export default function ListPage() {
       </section>
 
       {/* Pass the selected task and isOpen to TaskEditor */}
-      <TaskEditor
-        isOpen={isOpen}
-        selectedTask={selectedTask}
-        onOpenChange={onOpenChange}
-      />
+      <TaskEditor isOpen={isOpen} selectedTask={selectedTask} onOpenChange={onOpenChange} />
     </DefaultLayout>
   );
 }

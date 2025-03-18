@@ -1,11 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const sqlite3 = require("sqlite3").verbose();
-const {
-  db,
-  initializeTables,
-  initializeTestData,
-} = require("./../initializeDatabase.js");
+const { db, initializeTables, initializeTestData } = require("./../initializeDatabase.js");
 
 // Initialize database
 initializeTables();
@@ -16,21 +12,15 @@ const checkUserInList = (req, res, next) => {
   const userId = req.headers["userid"];
   const listId = req.params.listId;
 
-  db.get(
-    "SELECT * FROM listUsers WHERE listId = ? AND userId = ?",
-    [listId, userId],
-    (err, row) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      if (!row) {
-        return res
-          .status(403)
-          .json({ message: "User not authorized for this list" });
-      }
-      next();
+  db.get("SELECT * FROM listUsers WHERE listId = ? AND userId = ?", [listId, userId], (err, row) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
     }
-  );
+    if (!row) {
+      return res.status(403).json({ message: "User not authorized for this list" });
+    }
+    next();
+  });
 };
 
 // Create a new list
@@ -41,16 +31,12 @@ router.post("/lists", (req, res) => {
       return res.status(500).json({ error: err.message });
     }
     const newList = { id: this.lastID, name };
-    db.run(
-      "INSERT INTO listUsers (listId, userId) VALUES (?, ?)",
-      [newList.id, userId],
-      function (err) {
-        if (err) {
-          return res.status(500).json({ error: err.message });
-        }
-        res.status(201).json(newList);
+    db.run("INSERT INTO listUsers (listId, userId) VALUES (?, ?)", [newList.id, userId], function (err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
       }
-    );
+      res.status(201).json(newList);
+    });
   });
 });
 
@@ -71,7 +57,7 @@ router.get("/lists", (req, res) => {
         return res.status(500).json({ error: err.message });
       }
       res.json(rows);
-    }
+    },
   );
 });
 
@@ -80,54 +66,38 @@ router.post("/lists/:listId/users", (req, res) => {
   const { listId } = req.params;
   const { assignedUserName } = req.body;
   console.log("List ID: " + listId);
-  db.get(
-    "SELECT id FROM users WHERE username = ?",
-    [assignedUserName],
-    (err, row) => {
+  db.get("SELECT id FROM users WHERE username = ?", [assignedUserName], (err, row) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (!row) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const assignedUserId = row.id;
+    // Check if user is already assigned
+    db.get("SELECT * FROM listUsers WHERE listId = ? AND userId = ?", [listId, assignedUserId], (err, row) => {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
-      if (!row) {
-        return res.status(404).json({ message: "User not found" });
+      if (row) {
+        return res.status(409).json({ message: "User already assigned to list" });
       }
-      const assignedUserId = row.id;
-      // Check if user is already assigned
-      db.get(
-        "SELECT * FROM listUsers WHERE listId = ? AND userId = ?",
-        [listId, assignedUserId],
-        (err, row) => {
+      db.run("INSERT INTO listUsers (listId, userId) VALUES (?, ?)", [listId, assignedUserId], function (err) {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+
+        db.get("SELECT name FROM lists WHERE id = ?", [listId], (err, row) => {
           if (err) {
             return res.status(500).json({ error: err.message });
           }
-          if (row) {
-            return res
-              .status(409)
-              .json({ message: "User already assigned to list" });
-          }
-          db.run(
-            "INSERT INTO listUsers (listId, userId) VALUES (?, ?)",
-            [listId, assignedUserId],
-            function (err) {
-              if (err) {
-                return res.status(500).json({ error: err.message });
-              }
-
-              db.get("SELECT name FROM lists WHERE id = ?", [listId], (err, row) => {
-                if (err) {
-                  return res.status(500).json({ error: err.message });
-                }
-                const listName = row.name;
-                req.io
-                .to(String(assignedUserId))
-                .emit("assignedToList", { id: listId, name: listName, isShared: true });
-                res.status(201).json({ listId: listId, assignedUserId });
-              })
-            }
-          );
-        }
-      );
-    }
-  );
+          const listName = row.name;
+          req.io.to(String(assignedUserId)).emit("assignedToList", { id: listId, name: listName, isShared: true });
+          res.status(201).json({ listId: listId, assignedUserId });
+        });
+      });
+    });
+  });
 });
 
 // Create a new task
@@ -155,7 +125,7 @@ router.post("/lists/:listId/tasks", checkUserInList, (req, res) => {
       // });
       req.io.to(listId).emit("taskAdded", newTask);
       res.status(201).json(newTask);
-    }
+    },
   );
 });
 
@@ -172,7 +142,7 @@ router.get("/lists/:listId/tasks", checkUserInList, (req, res) => {
     }
     db.all(
       `SELECT ta.taskId, u.username FROM taskAssignments ta JOIN users u ON ta.userId = u.id WHERE ta.taskId IN (${taskIds.join(
-        ","
+        ",",
       )})`,
       [],
       (err, assignments) => {
@@ -186,7 +156,7 @@ router.get("/lists/:listId/tasks", checkUserInList, (req, res) => {
           return task;
         });
         res.json(tasksWithUsers);
-      }
+      },
     );
   });
 });
@@ -213,7 +183,7 @@ router.put("/lists/:listId/tasks/:id", checkUserInList, (req, res) => {
       };
       req.io.to(listId).emit("taskUpdated", updatedTask);
       res.json(updatedTask);
-    }
+    },
   );
 });
 
@@ -230,38 +200,30 @@ router.delete("/lists/:listId/tasks/:id", checkUserInList, (req, res) => {
 });
 
 // Mark a task as completed
-router.post(
-  "/lists/:listId/tasks/:id/complete",
-  checkUserInList,
-  (req, res) => {
-    const { id, listId } = req.params;
+router.post("/lists/:listId/tasks/:id/complete", checkUserInList, (req, res) => {
+  const { id, listId } = req.params;
 
-    // Fetch the current completed status
-    db.get("SELECT completed FROM tasks WHERE id = ?", [id], (err, row) => {
+  // Fetch the current completed status
+  db.get("SELECT completed FROM tasks WHERE id = ?", [id], (err, row) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+
+    const newCompletedStatus = !row.completed;
+
+    // Update the completed status to the opposite
+    db.run("UPDATE tasks SET completed = ? WHERE id = ?", [newCompletedStatus, id], function (err) {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
-
-      const newCompletedStatus = !row.completed;
-
-      // Update the completed status to the opposite
-      db.run(
-        "UPDATE tasks SET completed = ? WHERE id = ?",
-        [newCompletedStatus, id],
-        function (err) {
-          if (err) {
-            return res.status(500).json({ error: err.message });
-          }
-          req.io.to(listId).emit("taskCompleted", {
-            taskId: id,
-            completed: newCompletedStatus,
-          });
-          res.json({ taskId: id, completed: newCompletedStatus });
-        }
-      );
+      req.io.to(listId).emit("taskCompleted", {
+        taskId: id,
+        completed: newCompletedStatus,
+      });
+      res.json({ taskId: id, completed: newCompletedStatus });
     });
-  }
-);
+  });
+});
 
 // Assign a task to a user
 router.post("/lists/:listId/tasks/:id/assign", checkUserInList, (req, res) => {
@@ -276,7 +238,7 @@ router.post("/lists/:listId/tasks/:id/assign", checkUserInList, (req, res) => {
       }
       req.io.emit("taskAssigned", { taskId: id, userId });
       res.status(201).json({ taskId: id, userId });
-    }
+    },
   );
 });
 
@@ -294,24 +256,20 @@ router.post("/lists/:listId/tasks/:id/lock", checkUserInList, (req, res) => {
       }
       req.io.emit("taskLocked", { taskId: id, userId, lockExpiration });
       res.json({ taskId: id, userId, lockExpiration });
-    }
+    },
   );
 });
 
 // Unlock a task
 router.post("/lists/:listId/tasks/:id/unlock", checkUserInList, (req, res) => {
   const { id } = req.params;
-  db.run(
-    "UPDATE tasks SET lockedBy = ?, lockExpiration = ? WHERE id = ?",
-    [null, null, id],
-    function (err) {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      req.io.emit("taskUnlocked", { taskId: id });
-      res.json({ taskId: id });
+  db.run("UPDATE tasks SET lockedBy = ?, lockExpiration = ? WHERE id = ?", [null, null, id], function (err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
     }
-  );
+    req.io.emit("taskUnlocked", { taskId: id });
+    res.json({ taskId: id });
+  });
 });
 
 // User login

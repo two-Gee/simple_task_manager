@@ -1,10 +1,4 @@
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerBody,
-  DrawerFooter,
-} from "@heroui/drawer";
+import { Drawer, DrawerContent, DrawerHeader, DrawerBody, DrawerFooter } from "@heroui/drawer";
 import { Button } from "@heroui/button";
 
 import { TaskData } from "@/pages/list";
@@ -15,23 +9,15 @@ interface TaskEditorProps {
   selectedTask: TaskData | null;
 }
 
-export const TaskEditor = ({
-  isOpen,
-  onOpenChange,
-  selectedTask,
-}: TaskEditorProps) => {
+export const TaskEditor = ({ isOpen, onOpenChange, selectedTask }: TaskEditorProps) => {
   return (
     <Drawer isOpen={isOpen} onOpenChange={onOpenChange}>
       <DrawerContent>
         {(onClose) => (
           <>
-            <DrawerHeader className="flex flex-col gap-1">
-              {selectedTask?.title}
-            </DrawerHeader>
+            <DrawerHeader className="flex flex-col gap-1">{selectedTask?.title}</DrawerHeader>
             <DrawerBody>
-              <span className="text-base">
-                Due Date: {selectedTask?.dueDate || "—"}
-              </span>
+              <span className="text-base">Due Date: {selectedTask?.dueDate || "—"}</span>
             </DrawerBody>
             <DrawerFooter>
               <Button color="primary" onPress={onClose}>

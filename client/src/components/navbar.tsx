@@ -1,10 +1,5 @@
 import { Link } from "@heroui/link";
-import {
-  Navbar as HeroUINavbar,
-  NavbarBrand,
-  NavbarContent,
-  NavbarItem,
-} from "@heroui/navbar";
+import { Navbar as HeroUINavbar, NavbarBrand, NavbarContent, NavbarItem } from "@heroui/navbar";
 import { link as linkStyles } from "@heroui/theme";
 import clsx from "clsx";
 import { siteConfig } from "@/config/site";
@@ -26,8 +21,10 @@ export const Navbar = () => {
             <NavbarItem key={item.href}>
               <Link
                 className={clsx(
-                  linkStyles({ color: "foreground" }),
-                  "data-[active=true]:text-primary data-[active=true]:font-medium"
+                  linkStyles({
+                    color: "foreground",
+                  }),
+                  "data-[active=true]:text-primary data-[active=true]:font-medium",
                 )}
                 color="foreground"
                 href={item.href}
@@ -39,10 +36,7 @@ export const Navbar = () => {
         </div>
       </NavbarContent>
 
-      <NavbarContent
-        className="hidden sm:flex basis-1/5 sm:basis-full"
-        justify="end"
-      >
+      <NavbarContent className="hidden sm:flex basis-1/5 sm:basis-full" justify="end">
         <NavbarItem className="hidden sm:flex gap-2">
           <ThemeSwitch />
         </NavbarItem>

@@ -10,9 +10,9 @@ import { useEffect } from "react";
 function App() {
   return (
     <UserProvider>
-        <LoginModal />
-        <SocketListener />
-        <Routes>
+      <LoginModal />
+      <SocketListener />
+      <Routes>
         <Route element={<IndexPage />} path="/" />
         <Route path="/list/:name" element={<ListPage />} />
       </Routes>

@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import Cookies from "js-cookie";
 
 interface UserContextType {
   userId: string | null;
@@ -10,12 +10,14 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const UserProvider: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
   const [userId, setUserId] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const storedUserId = Cookies.get('userId');
+    const storedUserId = Cookies.get("userId");
     // if (storedUserId) {
     //   // Validate the userId with the backend
     //     fetch(`http://localhost:4000/api/user/validate`, {
@@ -38,10 +40,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     //     Cookies.remove('userId');
     //   });
     // }
-    if(storedUserId){
+    if (storedUserId) {
       setUserId(storedUserId);
       setIsLoggedIn(true);
-    }else{
+    } else {
       setIsLoggedIn(false);
     }
   }, []);
@@ -49,18 +51,24 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = (userId: string) => {
     setUserId(userId);
     setIsLoggedIn(true);
-    Cookies.set('userId', userId);
+    Cookies.set("userId", userId);
   };
 
   const logout = () => {
     setUserId(null);
     setIsLoggedIn(false);
-    Cookies.remove('userId');
+    Cookies.remove("userId");
   };
-  
 
   return (
-    <UserContext.Provider value={{ userId, isLoggedIn, login, logout }}>
+    <UserContext.Provider
+      value={{
+        userId,
+        isLoggedIn,
+        login,
+        logout,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );
@@ -69,7 +77,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useUser = () => {
   const context = useContext(UserContext);
   if (context === undefined) {
-    throw new Error('useUser must be used within a UserProvider');
+    throw new Error("useUser must be used within a UserProvider");
   }
   return context;
 };

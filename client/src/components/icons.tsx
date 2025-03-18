@@ -13,21 +13,12 @@ export const PlusIcon = ({ ...props }: IconSvgProps) => {
       height="24"
       {...props}
     >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
     </svg>
   );
 };
 
-export const MoonFilledIcon = ({
-  size = 24,
-  width,
-  height,
-  ...props
-}: IconSvgProps) => (
+export const MoonFilledIcon = ({ size = 24, width, height, ...props }: IconSvgProps) => (
   <svg
     aria-hidden="true"
     focusable="false"
@@ -44,12 +35,7 @@ export const MoonFilledIcon = ({
   </svg>
 );
 
-export const SunFilledIcon = ({
-  size = 24,
-  width,
-  height,
-  ...props
-}: IconSvgProps) => (
+export const SunFilledIcon = ({ size = 24, width, height, ...props }: IconSvgProps) => (
   <svg
     aria-hidden="true"
     focusable="false"
@@ -67,14 +53,7 @@ export const SunFilledIcon = ({
 );
 
 export const Logo = ({ size = 24, width, height, ...props }: IconSvgProps) => (
-  <svg
-    aria-hidden="true"
-    focusable="false"
-    width={size}
-    height={size}
-    viewBox="0 0 437 380"
-    {...props}
-  >
+  <svg aria-hidden="true" focusable="false" width={size} height={size} viewBox="0 0 437 380" {...props}>
     <path
       fillRule="evenodd"
       clipRule="evenodd"
