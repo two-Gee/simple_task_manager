@@ -1,7 +1,7 @@
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
-const tasksRouter = require("./api/routes.js");
+const routes = require("./api/index.js");
 const cors = require("cors");
 
 const app = express();
@@ -26,7 +26,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/api", tasksRouter);
+app.use("/api", routes);
 
 // WebSocket connection
 io.on("connection", (socket) => {
