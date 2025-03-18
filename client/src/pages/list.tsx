@@ -4,8 +4,10 @@ import { Card, CardBody } from "@heroui/card";
 import { Input } from "@heroui/input";
 import { Spinner } from "@heroui/spinner";
 import Cookies from "js-cookie";
-import { useParams, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { title } from "@/components/primitives";
+import { Accordion, AccordionItem } from "@heroui/accordion";
+import { Image } from "@heroui/image";
 import { Task } from "@/components/task";
 import DefaultLayout from "@/layouts/default";
 import { TaskEditor } from "@/components/taskEditor";
@@ -30,6 +32,7 @@ export default function ListPage() {
   const [loading, setLoading] = useState(false);
   const [isInputOpen, setIsInputOpen] = useState(false);
   const [tasks, setTasks] = useState<TaskData[]>([]);
+  const [completedTasks, setCompletedTasks] = useState<TaskData[]>([]);
   const inputRef = useRef<HTMLDivElement>(null);
 
   // Use custom hook to close the task input when clicking outside
@@ -95,11 +98,11 @@ export default function ListPage() {
 
   return (
     <DefaultLayout>
-      <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-        <div className="inline-block max-w-lg text-center justify-center">
+      <section className="flex flex-col items-center justify-center gap-4">
+        <div className="inline-block max-w-lg text-center justify-center pb-4">
           <h1 className={title()}>List {listId}</h1>
         </div>
-        {loading && (
+        {!tasks && loading && (
           <Spinner
             className="mt-12"
             color="secondary"
@@ -108,21 +111,69 @@ export default function ListPage() {
             variant="gradient"
           />
         )}
-        {tasks &&
-          tasks.map((task) => (
-            <Task
-              key={task.id}
-              assignedUsers={task.assignedUsers}
-              completed={task.completed}
-              dueDate={task.dueDate}
-              id={task.id}
-              listId={listId}
-              openEditor={() => handleOpenEditor(task)}
-              title={task.title}
+        {tasks && tasks.filter((task) => !task.completed).length !== 0 ? (
+          tasks
+            .filter((task) => !task.completed)
+            .map((task) => (
+              <div className="w-5/6" key={task.id}>
+                <Task
+                  key={task.id}
+                  assignedUsers={task.assignedUsers}
+                  completed={task.completed}
+                  dueDate={task.dueDate}
+                  id={task.id}
+                  listId={listId}
+                  openEditor={() => handleOpenEditor(task)}
+                  title={task.title}
+                />
+              </div>
+            ))
+        ) : (
+          <>
+            <Image
+              alt="Image with delay"
+              height={180}
+              src="/noTasks.svg"
+              width={150}
             />
-          ))}
+            <span className="text-lg font-medium">All done!</span>
+          </>
+        )}
       </section>
-      <section className="flex flex-col items-center py-8 md:py-10">
+      {tasks.filter((task) => task.completed).length !== 0 && (
+        <section className="flex flex-col items-center justify-center ">
+          <div className="w-5/6">
+            <Accordion className="w-full pb-5" variant="light">
+              <AccordionItem
+                key="1"
+                aria-label="Completed tasks"
+                title="Completed Tasks"
+              >
+                <div className="flex flex-col items-center gap-4 w-full">
+                  {tasks &&
+                    tasks
+                      .filter((task) => task.completed)
+                      .map((task) => (
+                        <div className="w-full" key={task.id}>
+                          <Task
+                            key={task.id}
+                            assignedUsers={task.assignedUsers}
+                            completed={task.completed}
+                            dueDate={task.dueDate}
+                            id={task.id}
+                            listId={listId}
+                            openEditor={() => handleOpenEditor(task)}
+                            title={task.title}
+                          />
+                        </div>
+                      ))}
+                </div>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        </section>
+      )}
+      <section className="mt-auto flex flex-col items-center py-20">
         {isInputOpen ? (
           <div ref={inputRef} className="w-5/6">
             <InputTask listId={listId} setTasks={setTasks} tasks={tasks} />
