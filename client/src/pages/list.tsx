@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useDisclosure } from "@heroui/react";
 import { Card, CardBody } from "@heroui/card";
 import { Input } from "@heroui/input";
+import { Spinner } from "@heroui/spinner";
 import Cookies from "js-cookie";
 
 import { title } from "@/components/primitives";
@@ -24,6 +25,7 @@ export type TaskData = {
 export default function ListPage({ listId = 1 }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
+  const [loading, setLoading] = useState(false);
   const [isInputOpen, setIsInputOpen] = useState(false);
   const [tasks, setTasks] = useState<TaskData[]>([]);
   const inputRef = useRef<HTMLDivElement>(null);
@@ -62,6 +64,7 @@ export default function ListPage({ listId = 1 }) {
   };
 
   const fetchData = () => {
+    setLoading(true);
     // Fetch all tasks for the list
     fetch(`http://localhost:4000/api/lists/${listId}/tasks`, {
       method: "GET",
@@ -73,6 +76,7 @@ export default function ListPage({ listId = 1 }) {
       .then((response) => response.json())
       .then((data) => {
         setTasks(data);
+        setLoading(false);
       })
       .catch((error) => console.error("Error fetching tasks:", error));
   };
@@ -93,6 +97,15 @@ export default function ListPage({ listId = 1 }) {
         <div className="inline-block max-w-lg text-center justify-center">
           <h1 className={title()}>List {listId}</h1>
         </div>
+        {loading && (
+          <Spinner
+            className="mt-12"
+            color="secondary"
+            label="Loading tasks..."
+            size="lg"
+            variant="gradient"
+          />
+        )}
         {tasks &&
           tasks.map((task) => (
             <Task
