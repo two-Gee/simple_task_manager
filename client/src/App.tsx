@@ -11,7 +11,7 @@ function App() {
         <LoginModal />
         <Routes>
         <Route element={<IndexPage />} path="/" />
-        <Route element={<ListPage />} path="/docs" />
+        <Route path="/list/:name" element={<ListPage />} />
       </Routes>
     </UserProvider>
   );

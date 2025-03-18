@@ -4,7 +4,7 @@ import { Card, CardBody } from "@heroui/card";
 import { Input } from "@heroui/input";
 import { Spinner } from "@heroui/spinner";
 import Cookies from "js-cookie";
-
+import { useParams, useLocation } from "react-router-dom";
 import { title } from "@/components/primitives";
 import { Task } from "@/components/task";
 import DefaultLayout from "@/layouts/default";
@@ -22,7 +22,9 @@ export type TaskData = {
   assignedUsers?: string[];
 };
 
-export default function ListPage({ listId = 1 }) {
+export default function ListPage() {
+  const location = useLocation(); // Get the location object
+  const listId = location.state.id; // Get the list ID from the location object
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
   const [loading, setLoading] = useState(false);

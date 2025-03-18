@@ -56,9 +56,15 @@ router.post("/lists", (req, res) => {
 
 // Get all lists
 router.get("/lists", (req, res) => {
-  const userId = req.query.userId;
+  const userId = req.headers.userid;
   db.all(
-    "SELECT lists.* FROM lists JOIN listUsers ON lists.id = listUsers.listId WHERE listUsers.userId = ?",
+    `
+        SELECT lists.*, 
+        (SELECT COUNT(*) > 1 FROM listUsers WHERE listId = lists.id) AS isShared 
+        FROM lists 
+        JOIN listUsers ON lists.id = listUsers.listId 
+        WHERE listUsers.userId = ?
+    `,
     [userId],
     (err, rows) => {
       if (err) {
