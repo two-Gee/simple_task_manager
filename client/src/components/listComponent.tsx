@@ -1,11 +1,4 @@
-
-
-
-import { useState } from "react";
 import { Card, CardBody } from "@heroui/card";
-import { Checkbox } from "@heroui/checkbox";
-import { Chip } from "@heroui/chip";
-import { formatDate } from "@/utils/dateFormatter";
 import GroupIcon from '@mui/icons-material/Group';
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 
@@ -24,7 +17,7 @@ export const ListComponent = ({
   }: ListProps) => {
     const navigate = useNavigate(); // Initialize useNavigate
     const handleCardClick = () => {
-      navigate(`/list/${name}`, {state:{id}}); // Navigate to the list page with the list ID
+      navigate(`/list/${name}`, {state:{id, name}}); // Navigate to the list page with the list ID
     };
     return (
         <Card className="h-20 w-5/6">

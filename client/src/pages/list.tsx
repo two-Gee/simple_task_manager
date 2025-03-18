@@ -25,6 +25,7 @@ export type TaskData = {
 export default function ListPage() {
   const location = useLocation(); // Get the location object
   const listId = location.state.id; // Get the list ID from the location object
+  const listName = location.state.name; // Get the list ID from the location object
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -97,7 +98,7 @@ export default function ListPage() {
     <DefaultLayout>
       <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
         <div className="inline-block max-w-lg text-center justify-center">
-          <h1 className={title()}>List {listId}</h1>
+          <h1 className={title()}>{listName}</h1>
         </div>
         {loading && (
           <Spinner
