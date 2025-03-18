@@ -1,8 +1,9 @@
 import {React, useState } from 'react';
-import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button, Input} from "@heroui/react";
+import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button, Input, addToast} from "@heroui/react";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import AddIcon from '@mui/icons-material/Add';
 import Cookies from 'js-cookie';
+import { useLocation } from 'react-router-dom';
 // TODO: Toast einbauen für Fehlermeldungen und Erfolgsmeldungen
 // TODO: Farbe ggf. anpassen weil der Theme Toggle heller ist  
 
@@ -10,8 +11,10 @@ interface User {
     id: number;
     name: string;
 }
-const listId = 1;
+
 const AddUser: React.FC = () => {
+    const location = useLocation(); // Get the location object
+    const listId = location.state.id; // Get the list ID from the location object
     const [userName, setUserName] = useState<string>('');
 
     const handleAddUser = () => {
@@ -25,16 +28,32 @@ const AddUser: React.FC = () => {
         })
         .then(response => {
             if(response.ok) {
-                console.log("User added");
-                return response.json();
-            }else{
-                console.error("Add user failed");
-                return response.json();
+                addToast({
+                    title: "User added",
+                    description: "User "+userName+" added to list",
+                    color: 'success',
+                });
 
-            }  
-        })
-        .then(data => {
-            console.log(data);
+            }else if(response.status == 404) {
+                addToast({
+                    title: "User not found",
+                    description: "User "+userName+" not found",
+                    color: 'danger',
+                });
+
+            }else if(response.status == 409) {
+                addToast({
+                    title: "User already in list",
+                    description: "User "+userName+" is already in list",
+                    color: 'danger',
+                });
+            }
+        }).catch(error => {
+            addToast({
+                title: "An error occured",
+                description: "An error occured while adding user to list: "+error,
+                color: 'danger',
+            });
         })
     };
 
