@@ -7,12 +7,12 @@ import {
 } from "@heroui/navbar";
 import { link as linkStyles } from "@heroui/theme";
 import clsx from "clsx";
-
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { Logo } from "./icons";
 import AddUser from "./addUser";
 import { useLocation } from "react-router-dom";
+
 export const Navbar = () => {
   const location = useLocation(); // Use useLocation to get the current route
   return (
@@ -46,7 +46,7 @@ export const Navbar = () => {
         <NavbarItem className="hidden sm:flex gap-2">
           <ThemeSwitch />
         </NavbarItem>
-        {location.pathname === "/docs" && ( // Conditionally render AddUser based on the route
+        {location.pathname.includes("/list") && ( // Conditionally render AddUser based on the route
           <NavbarItem className="hidden sm:flex gap-2">
             <AddUser />
           </NavbarItem>

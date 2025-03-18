@@ -79,6 +79,7 @@ router.get("/lists", (req, res) => {
 router.post("/lists/:listId/users", (req, res) => {
   const { listId } = req.params;
   const { assignedUserName } = req.body;
+  console.log("List ID: " + listId);
   db.get(
     "SELECT id FROM users WHERE username = ?",
     [assignedUserName],
@@ -110,10 +111,17 @@ router.post("/lists/:listId/users", (req, res) => {
               if (err) {
                 return res.status(500).json({ error: err.message });
               }
-              req.io
-                .to(listId)
-                .emit("userAssignedToList", { listId: listId, assignedUserId });
-              res.status(201).json({ listId: listId, assignedUserId });
+
+              db.get("SELECT name FROM lists WHERE id = ?", [listId], (err, row) => {
+                if (err) {
+                  return res.status(500).json({ error: err.message });
+                }
+                const listName = row.name;
+                req.io
+                .to(String(assignedUserId))
+                .emit("assignedToList", { id: listId, name: listName, isShared: true });
+                res.status(201).json({ listId: listId, assignedUserId });
+              })
             }
           );
         }
@@ -317,7 +325,7 @@ router.post("/user/login", (req, res) => {
     if (row) {
       res.status(200).json(row);
     } else {
-      res.status(401).json({ message: "Invalid username" });
+      res.status(400).json({ message: "Invalid username" });
     }
   });
 });
