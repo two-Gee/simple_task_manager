@@ -57,6 +57,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoggedIn(false);
     Cookies.remove('userId');
   };
+  
 
   return (
     <UserContext.Provider value={{ userId, isLoggedIn, login, logout }}>
