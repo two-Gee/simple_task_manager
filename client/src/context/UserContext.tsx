@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 interface UserContextType {
   userId: string | null;
   isLoggedIn: boolean;
-  login: (userId: string) => void;
+  login: (userId: string, username:string) => void;
   logout: () => void;
 }
 
@@ -48,10 +48,11 @@ export const UserProvider: React.FC<{
     }
   }, []);
 
-  const login = (userId: string) => {
+  const login = (userId: string, username: string) => {
     setUserId(userId);
     setIsLoggedIn(true);
     Cookies.set("userId", userId);
+    Cookies.set("username", username);
   };
 
   const logout = () => {
