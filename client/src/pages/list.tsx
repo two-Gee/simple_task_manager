@@ -57,6 +57,10 @@ export default function ListPage() {
       setTasks((prevTasks) => setTaskCompleted(prevTasks, taskId));
     });
 
+    socket.on("taskDeleted", ( id ) => {
+      console.log("Task deleted:", id);
+      setTasks((prevTasks) => prevTasks.filter((task) => task.id.toString() !== id));
+    })
     // Cleanup on component unmount
     return () => {
       socket.emit("leaveList", listId);
@@ -151,6 +155,7 @@ export default function ListPage() {
                             listId={listId}
                             openEditor={() => handleOpenEditor(task)}
                             title={task.title}
+                            isLocked={task.isLocked}
                           />
                         </div>
                       ))}
@@ -181,7 +186,7 @@ export default function ListPage() {
       </section>
 
       {/* Pass the selected task and isOpen to TaskEditor */}
-      <TaskEditor isOpen={isOpen} selectedTask={selectedTask} onOpenChange={onOpenChange} />
+      {selectedTask&&<TaskEditor isOpen={isOpen} selectedTask={selectedTask} onOpenChange={onOpenChange} listId={listId} />}
     </DefaultLayout>
   );
 }
