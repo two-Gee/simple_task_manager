@@ -34,15 +34,6 @@ export const Task = ({
   users,
 }: TaskProps) => {
 
-  // useEffect(() => {
-  //   if (prevAssignedUsers) {
-  //     console.log(prevAssignedUsers);
-
-  //     const userIdStrings = prevAssignedUsers.map((u) => String(u.id));
-  //     setAssignedUsers(new Set(userIdStrings));
-  //   }
-  // }, [prevAssignedUsers]);
-
   const handleTaskCompletion = () => {
     fetch(`http://localhost:4000/api/lists/${listId}/tasks/${id}/complete`, {
       method: "POST",

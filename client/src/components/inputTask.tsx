@@ -5,6 +5,7 @@ import { Form } from "@heroui/form";
 import { Button } from "@heroui/button";
 import { useState } from "react";
 import { DateValue } from "@heroui/react";
+import { getLocalTimeZone, today } from "@internationalized/date";
 
 import { PlusIcon } from "./icons";
 
@@ -41,7 +42,6 @@ export const InputTask = ({ listId, setTasks, tasks }: InputTaskProps) => {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
         setTasks(() => [...tasks, data]);
       })
       .catch((error) => console.error("Error posting task:", error));
@@ -75,6 +75,8 @@ export const InputTask = ({ listId, setTasks, tasks }: InputTaskProps) => {
               className="max-w-40"
               label="Due date"
               labelPlacement="outside"
+              minValue={today(getLocalTimeZone())}
+              showMonthAndYearPickers
               name="dueDate"
               selectorButtonPlacement="start"
               value={dueDate}

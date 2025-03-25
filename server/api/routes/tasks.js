@@ -70,19 +70,18 @@ router.get("/:listId/tasks/", checkUserInList, (req, res) => {
 // Update a task
 router.put("/:listId/tasks/:id", checkUserInList, (req, res) => {
   const { id, listId } = req.params;
-  const { title, dueDate, completed, lockedBy, lockExpiration } = req.body;
+  const { title, dueDate, lockedBy, lockExpiration } = req.body;
   db.run(
-    "UPDATE tasks SET title = ?, dueDate = ?, completed = ?, lockedBy = ?, lockExpiration = ?, listId = ? WHERE id = ?",
-    [title, dueDate, completed, lockedBy, lockExpiration, listId, id],
+    "UPDATE tasks SET title = ?, dueDate = ?, lockedBy = ?, lockExpiration = ?, listId = ? WHERE id = ?",
+    [title, dueDate, lockedBy, lockExpiration, listId, id],
     function (err) {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
       const updatedTask = {
-        id,
+        id: Number(id),
         title,
         dueDate,
-        completed,
         lockedBy,
         lockExpiration,
         listId,
