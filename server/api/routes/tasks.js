@@ -28,7 +28,7 @@ router.post("/:listId/tasks/", checkUserInList, (req, res) => {
       // });
       req.io.to(listId).emit("taskAdded", newTask);
       res.status(201).json(newTask);
-    },
+    }
   );
 });
 
@@ -89,13 +89,13 @@ router.put("/:listId/tasks/:id", checkUserInList, (req, res) => {
       };
       req.io.to(listId).emit("taskUpdated", updatedTask);
       res.json(updatedTask);
-    },
+    }
   );
 });
 
 // Delete a task
 router.delete("/:listId/tasks/:id", checkUserInList, (req, res) => {
-  const { id, listId} = req.params;
+  const { id, listId } = req.params;
   db.run("DELETE FROM tasks WHERE id = ?", id, function (err) {
     if (err) {
       return res.status(500).json({ error: err.message });
@@ -133,20 +133,64 @@ router.post("/:listId/tasks/:id/complete", checkUserInList, (req, res) => {
 
 // Assign a task to a user
 router.post("/:listId/tasks/:id/assign", checkUserInList, (req, res) => {
-  const { id } = req.params;
-  const { userId, add, remove } = req.body;
+  const { id, listId } = req.params;
+  const { userId } = req.body;
 
-  db.run(
-    "INSERT INTO taskAssignments (taskId, userId, addCounter, removeCounter) VALUES (?, ?, ?, ?)",
-    [id, userId, add, remove],
-    function (err) {
+  // Check if the assignment already exists
+  db.get("SELECT * FROM taskAssignments WHERE taskId = ? AND userId = ?", [id, userId], function (err, row) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (row) {
+      return res.status(200).json({ taskId: id, userId });
+    }
+
+    // Insert the new assignment
+    db.run("INSERT INTO taskAssignments (taskId, userId) VALUES (?, ?)", [id, userId], function (err) {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
-      req.io.emit("taskAssigned", { taskId: id, userId });
-      res.status(201).json({ taskId: id, userId });
+
+      // Fetch the username for the user
+      db.get("SELECT username FROM users WHERE id = ?", [userId], function (err, user) {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+        if (!user) {
+          return res.status(404).json({ error: "User not found" });
+        }
+
+        req.io.to(listId).emit("taskAssigned", {
+          taskId: id,
+          user: { id: userId, username: user.username },
+        });
+        res.status(201).json({ taskId: id, userId, username: user.username });
+      });
+    });
+  });
+});
+
+// Unassign a task from a user
+router.post("/:listId/tasks/:id/unassign", checkUserInList, (req, res) => {
+  const { id, listId } = req.params;
+  const { userId } = req.body;
+  console.log("unassigning task " + id + " from user " + userId);
+  db.get("SELECT * FROM taskAssignments WHERE taskId = ? AND userId = ?", [id, userId], function (err, row) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
     }
-  );
+    if (!row) {
+      return res.status(200).json({ taskId: id, userId });
+    }
+
+    db.run("DELETE FROM taskAssignments WHERE taskId = ? AND userId = ?", [id, userId], function (err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      req.io.to(listId).emit("taskUnassigned", { taskId: id, userId });
+      res.status(200).json({ taskId: id, userId });
+    });
+  });
 });
 
 // Lock a task for editing
@@ -163,7 +207,7 @@ router.post("/:listId/tasks/:id/lock", checkUserInList, (req, res) => {
       }
       req.io.emit("taskLocked", { taskId: id, userId, lockExpiration });
       res.json({ taskId: id, userId, lockExpiration });
-    },
+    }
   );
 });
 

@@ -10,7 +10,7 @@ const initializeTables = () => {
     );
     db.run("CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT)");
     db.run(
-      "CREATE TABLE taskAssignments (taskId INTEGER, userId INTEGER, addCounter INTEGER, removeCounter INTEGER, PRIMARY KEY (taskId, userId))",
+      "CREATE TABLE taskAssignments (taskId INTEGER, userId INTEGER, PRIMARY KEY (taskId, userId))",
     );
     db.run("CREATE TABLE listUsers (listId INTEGER, userId INTEGER, PRIMARY KEY (listId, userId))");
   });
@@ -36,9 +36,9 @@ const initializeTestData = () => {
     db.run(
       "INSERT INTO tasks (title, dueDate, completed, lockedBy, lockExpiration, listId) VALUES ('Task 3', '2023-12-31', 0, NULL, NULL, 2)",
     );
-    db.run("INSERT INTO taskAssignments (taskId, userId, addCounter, removeCounter) VALUES (1, 1, 1, 0)");
-    db.run("INSERT INTO taskAssignments (taskId, userId, addCounter, removeCounter) VALUES (2, 2, 1, 0)");
-    db.run("INSERT INTO taskAssignments (taskId, userId, addCounter, removeCounter) VALUES (3, 2, 1, 0)");
+    db.run("INSERT INTO taskAssignments (taskId, userId) VALUES (1, 1)");
+    db.run("INSERT INTO taskAssignments (taskId, userId) VALUES (2, 2)");
+    db.run("INSERT INTO taskAssignments (taskId, userId) VALUES (3, 2)");
   });
 };
 
