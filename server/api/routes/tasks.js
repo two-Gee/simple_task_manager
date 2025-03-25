@@ -95,12 +95,12 @@ router.put("/:listId/tasks/:id", checkUserInList, (req, res) => {
 
 // Delete a task
 router.delete("/:listId/tasks/:id", checkUserInList, (req, res) => {
-  const { id } = req.params;
+  const { id, listId} = req.params;
   db.run("DELETE FROM tasks WHERE id = ?", id, function (err) {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    req.io.emit("taskDeleted", id);
+    req.io.to(listId).emit("taskDeleted", id);
     res.status(204).end();
   });
 });

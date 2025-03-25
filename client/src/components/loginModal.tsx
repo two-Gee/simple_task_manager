@@ -1,7 +1,8 @@
 import React from "react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, addToast } from "@heroui/react";
 import { useUser } from "../context/UserContext";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
+import { RegisterModal } from "./registerModal";
 
 export function LoginModal() {
   const { isLoggedIn, login } = useUser();
@@ -9,6 +10,7 @@ export function LoginModal() {
   const [isInvalid, setIsInvalid] = React.useState(false);
   const [userName, setUserName] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isRegisterOpen, setIsRegisterOpen] = React.useState(false);
 
   const navigate = useNavigate();
 
@@ -49,39 +51,51 @@ export function LoginModal() {
         }
       })
       .then((data) => {
-        login(data.id);
+        login(data.id, userName);
         addToast({
           title: "Login successful",
           description: "Welcome back, " + userName,
           color: "success",
         });
         navigate("/");
+        setUserName("");
       });
   };
 
   return (
-    <Modal isOpen={!isLoggedIn} isDismissable={false} hideCloseButton backdrop="blur">
-      <ModalContent>
-        <ModalHeader className="flex flex-col gap-1">Welcome Back</ModalHeader>
-        <ModalBody>
-          <div className="flex flex-col gap-4">
-            <Input
-              label="Username"
-              placeholder="Enter your username"
-              type="text"
-              value={userName}
-              onValueChange={setUserName}
-              isInvalid={isInvalid}
-              errorMessage={errorMessage}
-            />
-          </div>
-        </ModalBody>
-        <ModalFooter>
-          <Button color="primary" onPress={handleLogin} isLoading={isLoading} fullWidth>
-            Log In
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+    <>
+      <Modal isOpen={!isLoggedIn} isDismissable={false} hideCloseButton backdrop="blur">
+        <ModalContent>
+          <ModalHeader className="flex flex-col gap-1">Welcome Back</ModalHeader>
+          <ModalBody>
+            <div className="flex flex-col gap-4">
+              <Input
+                label="Username"
+                placeholder="Enter your username"
+                type="text"
+                value={userName}
+                onValueChange={setUserName}
+                isInvalid={isInvalid}
+                errorMessage={errorMessage}
+              />
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <div className="flex flex-col gap-2 w-full">
+              <Button color="primary" onPress={handleLogin} isLoading={isLoading} fullWidth>
+                Log In
+              </Button>
+              <p className="pt-5 text-xs text-right">
+                Don't have an account?
+                <Button className="text-xs" variant="light" color="primary" onPress={() => setIsRegisterOpen(true)}>
+                  Sign Up
+                </Button>
+              </p>
+            </div>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      <RegisterModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
+    </>
   );
 }

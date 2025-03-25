@@ -18,6 +18,33 @@ router.post("/login", (req, res) => {
   });
 });
 
+// Create new user
+router.post("/register", (req, res) => {
+  const { username } = req.body;
+  if (!username) {
+    return res.status(400).json({ message: "Username required" });
+  }
+
+  db.get("SELECT id FROM users WHERE username = ?", [username], (err, row) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (row) {
+      return res.status(409).json({ message: "User already exists" });
+    }
+
+    db.run("INSERT INTO users (username) VALUES (?)", [username], function (err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+
+      // Return newly created user
+      const newUserId = this.lastID;
+      res.status(201).json({ id: newUserId, username });
+    });
+  });
+});
+
 // Validate user
 router.post("/validate", (req, res) => {
   const { id } = req.body;
