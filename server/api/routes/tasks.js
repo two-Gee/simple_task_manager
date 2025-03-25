@@ -194,30 +194,32 @@ router.post("/:listId/tasks/:id/unassign", checkUserInList, (req, res) => {
 
 // Lock a task for editing
 router.post("/:listId/tasks/:id/lock", checkUserInList, (req, res) => {
-  const { id } = req.params;
-  const { userId } = req.body;
+  const { id, listId } = req.params;
+  const { userid } = req.headers;
+  console.log("locking task " + id + " for user " + userid);
   const lockExpiration = Date.now() + 300000; // 5 minutes lock
   db.run(
     "UPDATE tasks SET lockedBy = ?, lockExpiration = ? WHERE id = ?",
-    [userId, lockExpiration, id],
+    [userid, lockExpiration, id],
     function (err) {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
-      req.io.emit("taskLocked", { taskId: id, userId, lockExpiration });
-      res.json({ taskId: id, userId, lockExpiration });
+      req.io.to(listId).emit("taskLocked", { taskId: id, userid, lockExpiration });
+      res.json({ taskId: id, userid, lockExpiration });
     }
   );
 });
 
 // Unlock a task
 router.post("/:listId/tasks/:id/unlock", checkUserInList, (req, res) => {
-  const { id } = req.params;
+  const { id, listId } = req.params;
+  console.log("unlocking task " + id);
   db.run("UPDATE tasks SET lockedBy = ?, lockExpiration = ? WHERE id = ?", [null, null, id], function (err) {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    req.io.emit("taskUnlocked", { taskId: id });
+    req.io.to(listId).emit("taskUnlocked", { taskId: id });
     res.json({ taskId: id });
   });
 });

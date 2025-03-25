@@ -108,16 +108,47 @@ export default function ListPage() {
       setTasks((prevTasks) => updateTasks(prevTasks, updatedTask));
     });
 
+    socket.on("taskLocked", ({ taskId }) => {
+      setTasks((prevTasks) => {
+        const updatedTasks = prevTasks.map((task) => {
+          if (task.id.toString() === taskId) {
+            task.isLocked = true;
+          }
+          return task;
+        });
+        return updatedTasks;
+      });
+    });
+
+    socket.on("taskUnlocked", ({ taskId }) => {
+      setTasks((prevTasks) => {
+        const updatedTasks = prevTasks.map((task) => {
+          if (task.id.toString() === taskId) {
+            task.isLocked = false;
+          }
+          return task;
+        });
+        return updatedTasks;
+      });
+    });
+
     // Cleanup on component unmount
     return () => {
       socket.emit("leaveList", listId);
       socket.off("taskAdded");
       socket.off("taskCompleted");
+      socket.off("newUserAssignedToList");
+      socket.off("taskDeleted");
+      socket.off("taskAssigned");
+      socket.off("taskUnassigned");
       socket.off("taskUpdated");
+      socket.off("taskLocked");
+      socket.off("taskUnlocked");
     };
   }, [listId]);
 
   const handleOpenEditor = (task: TaskData) => {
+    lockTask(task.id);
     setSelectedTask(task);
     onOpen();
   };
@@ -153,6 +184,22 @@ export default function ListPage() {
         setUsers(data);
       })
       .catch((error) => console.error("Error fetching users in list:", error));
+  };
+
+  const lockTask = (taskId: number) => {
+    console.log("Locking task", taskId);
+    fetch(`http://localhost:4000/api/lists/${listId}/tasks/${taskId}/lock`, {
+      method: "POST",
+      headers: new Headers({
+        "Content-Type": "application/json",
+        userId: Cookies.get("userId") || "",
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => console.error("Error locking task:", error));
   };
 
   function setTaskCompleted(tasks: TaskData[], taskId: string) {

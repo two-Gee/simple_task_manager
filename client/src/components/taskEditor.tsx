@@ -49,6 +49,23 @@ export const TaskEditor = ({ isOpen, onOpenChange, selectedTask, setSelectedTask
     }
   };
 
+
+  const unlockTask = (taskId: number) => {
+    console.log("Unlocking task", taskId);
+    fetch(`http://localhost:4000/api/lists/${listId}/tasks/${taskId}/unlock`, {
+      method: "POST",
+      headers: new Headers({
+        "Content-Type": "application/json",
+        userId: Cookies.get("userId") || "",
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => console.error("Error unlocking task:", error));
+  }
+
   useEffect(() => {
     setTitle(selectedTask?.title || "");
 
@@ -101,7 +118,8 @@ export const TaskEditor = ({ isOpen, onOpenChange, selectedTask, setSelectedTask
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) {
+    if (!open && selectedTask != null) {
+      unlockTask(selectedTask?.id);
       setSelectedTask(null);
     }
     onOpenChange(open);
