@@ -28,7 +28,7 @@ router.post("/:listId/tasks/", checkUserInList, (req, res) => {
       // });
       req.io.to(listId).emit("taskAdded", newTask);
       res.status(201).json(newTask);
-    },
+    }
   );
 });
 
@@ -70,32 +70,31 @@ router.get("/:listId/tasks/", checkUserInList, (req, res) => {
 // Update a task
 router.put("/:listId/tasks/:id", checkUserInList, (req, res) => {
   const { id, listId } = req.params;
-  const { title, dueDate, completed, lockedBy, lockExpiration } = req.body;
+  const { title, dueDate, lockedBy, lockExpiration } = req.body;
   db.run(
-    "UPDATE tasks SET title = ?, dueDate = ?, completed = ?, lockedBy = ?, lockExpiration = ?, listId = ? WHERE id = ?",
-    [title, dueDate, completed, lockedBy, lockExpiration, listId, id],
+    "UPDATE tasks SET title = ?, dueDate = ?, lockedBy = ?, lockExpiration = ?, listId = ? WHERE id = ?",
+    [title, dueDate, lockedBy, lockExpiration, listId, id],
     function (err) {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
       const updatedTask = {
-        id,
+        id: Number(id),
         title,
         dueDate,
-        completed,
         lockedBy,
         lockExpiration,
         listId,
       };
       req.io.to(listId).emit("taskUpdated", updatedTask);
       res.json(updatedTask);
-    },
+    }
   );
 });
 
 // Delete a task
 router.delete("/:listId/tasks/:id", checkUserInList, (req, res) => {
-  const { id, listId} = req.params;
+  const { id, listId } = req.params;
   db.run("DELETE FROM tasks WHERE id = ?", id, function (err) {
     if (err) {
       return res.status(500).json({ error: err.message });
@@ -163,7 +162,7 @@ router.post("/:listId/tasks/:id/lock", checkUserInList, (req, res) => {
       }
       req.io.emit("taskLocked", { taskId: id, userId, lockExpiration });
       res.json({ taskId: id, userId, lockExpiration });
-    },
+    }
   );
 });
 
