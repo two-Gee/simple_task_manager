@@ -36,7 +36,22 @@ router.get("/", (req, res) => {
         return res.status(500).json({ error: err.message });
       }
       res.json(rows);
-    },
+    }
+  );
+});
+
+// Get all users for a list
+router.get("/:listId/users", (req, res) => {
+  const { listId } = req.params;
+  db.all(
+    "SELECT users.* FROM users JOIN listUsers ON listUsers.userId = users.id WHERE listId = ?",
+    [listId],
+    (err, rows) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      res.json(rows);
+    }
   );
 });
 
