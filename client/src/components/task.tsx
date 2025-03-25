@@ -36,8 +36,6 @@ export const Task = ({
 
   useEffect(() => {
     if (prevAssignedUsers) {
-      console.log(prevAssignedUsers);
-
       const userIdStrings = prevAssignedUsers.map((u) => String(u.id));
       setAssignedUsers(new Set(userIdStrings));
     }
@@ -93,7 +91,6 @@ export const Task = ({
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
         setAssignedUsers(assignedUsers);
       })
       .catch((error: Error) => console.error("Error posting task:", error));
