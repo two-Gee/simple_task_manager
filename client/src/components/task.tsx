@@ -8,6 +8,7 @@ import type { SelectedItems, Selection } from "@heroui/react";
 import { formatDate } from "@/utils/dateFormatter";
 import { User } from "@/pages/list";
 import { useEffect, useState } from "react";
+import useSound from "use-sound";
 
 interface TaskProps {
   id: number;
@@ -33,6 +34,7 @@ export const Task = ({
   users,
 }: TaskProps) => {
   const [assignedUsers, setAssignedUsers] = useState<Selection>(new Set([]));
+  const [play] = useSound("/completed.mp3", { volume: 0.25 });
 
   useEffect(() => {
     if (prevAssignedUsers) {
@@ -42,6 +44,8 @@ export const Task = ({
   }, []);
 
   const handleTaskCompletion = () => {
+    play();
+
     fetch(`http://localhost:4000/api/lists/${listId}/tasks/${id}/complete`, {
       method: "POST",
       headers: new Headers({
