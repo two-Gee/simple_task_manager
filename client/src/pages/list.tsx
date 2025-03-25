@@ -219,7 +219,7 @@ export default function ListPage() {
                         <div className="w-full" key={task.id}>
                           <Task
                             key={task.id}
-                            prevAssignedUsers={task.assignedUsers}
+                            assignedUser={task.assignedUsers}
                             completed={task.completed}
                             dueDate={task.dueDate}
                             id={task.id}
