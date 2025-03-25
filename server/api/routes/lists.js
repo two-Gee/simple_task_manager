@@ -88,6 +88,11 @@ router.post("/:listId/users", (req, res) => {
             name: listName,
             isShared: true,
           });
+
+          req.io.to(listId).emit("newUserAssignedToList", {
+            user: { id: assignedUserId, username: assignedUserName },
+          });
+
           res.status(201).json({ listId, assignedUserId });
         });
       });
