@@ -21,8 +21,13 @@ export type TaskData = {
   title: string;
   dueDate?: string;
   completed?: boolean;
-  assignedUsers?: string[];
+  assignedUsers?: User[];
   isLocked: boolean;
+};
+
+export type User = {
+  id: number;
+  username: string;
 };
 
 export default function ListPage() {
@@ -34,7 +39,7 @@ export default function ListPage() {
   const [loading, setLoading] = useState(false);
   const [isInputOpen, setIsInputOpen] = useState(false);
   const [tasks, setTasks] = useState<TaskData[]>([]);
-  const [completedTasks, setCompletedTasks] = useState<TaskData[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const inputRef = useRef<HTMLDivElement>(null);
 
   // Use custom hook to close the task input when clicking outside
@@ -47,6 +52,7 @@ export default function ListPage() {
     socket.emit("joinList", listId.toString());
 
     fetchData();
+    fetchUsers();
 
     // Listen for taskAdded event
     socket.on("taskAdded", (newTask) => {
@@ -83,14 +89,28 @@ export default function ListPage() {
       .then((response) => response.json())
       .then((data) => {
         setTasks(data);
-        console.log("Tasks:", data);
         setLoading(false);
       })
       .catch((error) => console.error("Error fetching tasks:", error));
   };
 
+  const fetchUsers = () => {
+    fetch(`http://localhost:4000/api/lists/${listId}/users`, {
+      method: "GET",
+      headers: new Headers({
+        "Content-Type": "application/json",
+        userId: Cookies.get("userId") || "",
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setUsers(data);
+      })
+      .catch((error) => console.error("Error fetching users in list:", error));
+  };
+
   function setTaskCompleted(tasks: TaskData[], taskId: string) {
-    var tasksNew = tasks.map((task) =>
+    let tasksNew = tasks.map((task) =>
       task.id.toString() === taskId ? { ...task, completed: !task.completed } : task,
     );
 
@@ -113,11 +133,12 @@ export default function ListPage() {
               <div className="w-5/6" key={task.id}>
                 <Task
                   key={task.id}
-                  assignedUsers={task.assignedUsers}
+                  prevAssignedUsers={task.assignedUsers}
                   completed={task.completed}
                   dueDate={task.dueDate}
                   id={task.id}
                   listId={listId}
+                  users={users}
                   openEditor={() => handleOpenEditor(task)}
                   title={task.title}
                   isLocked={task.isLocked}
@@ -144,13 +165,15 @@ export default function ListPage() {
                         <div className="w-full" key={task.id}>
                           <Task
                             key={task.id}
-                            assignedUsers={task.assignedUsers}
+                            prevAssignedUsers={task.assignedUsers}
                             completed={task.completed}
                             dueDate={task.dueDate}
                             id={task.id}
                             listId={listId}
+                            users={users}
                             openEditor={() => handleOpenEditor(task)}
                             title={task.title}
+                            isLocked={false}
                           />
                         </div>
                       ))}
@@ -181,7 +204,9 @@ export default function ListPage() {
       </section>
 
       {/* Pass the selected task and isOpen to TaskEditor */}
-      <TaskEditor isOpen={isOpen} selectedTask={selectedTask} onOpenChange={onOpenChange} />
+      {selectedTask && (
+        <TaskEditor isOpen={isOpen} selectedTask={selectedTask} listId={listId} onOpenChange={onOpenChange} />
+      )}
     </DefaultLayout>
   );
 }

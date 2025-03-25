@@ -45,8 +45,8 @@ router.get("/:listId/tasks/", checkUserInList, (req, res) => {
       return res.json(tasks);
     }
     db.all(
-      `SELECT ta.taskId, u.username FROM taskAssignments ta JOIN users u ON ta.userId = u.id WHERE ta.taskId IN (${taskIds.join(
-        ",",
+      `SELECT ta.taskId, u.username, u.id FROM taskAssignments ta JOIN users u ON ta.userId = u.id WHERE ta.taskId IN (${taskIds.join(
+        ","
       )})`,
       [],
       (err, assignments) => {
@@ -56,12 +56,13 @@ router.get("/:listId/tasks/", checkUserInList, (req, res) => {
         const tasksWithUsers = tasks.map((task) => {
           task.assignedUsers = assignments
             .filter((assignment) => assignment.taskId === task.id)
-            .map((assignment) => assignment.username);
-          task.isLocked = task.lockedBy !== null && (task.lockExpiration * 1000) > Date.now();
+            .map((assignment) => ({ id: assignment.id, username: assignment.username }));
+          task.isLocked = task.lockedBy !== null && task.lockExpiration * 1000 > Date.now();
+
           return task;
         });
         res.json(tasksWithUsers);
-      },
+      }
     );
   });
 });
@@ -133,17 +134,18 @@ router.post("/:listId/tasks/:id/complete", checkUserInList, (req, res) => {
 // Assign a task to a user
 router.post("/:listId/tasks/:id/assign", checkUserInList, (req, res) => {
   const { id } = req.params;
-  const { userId } = req.body;
+  const { userId, add, remove } = req.body;
+
   db.run(
     "INSERT INTO taskAssignments (taskId, userId, addCounter, removeCounter) VALUES (?, ?, ?, ?)",
-    [id, userId, 1, 0],
+    [id, userId, add, remove],
     function (err) {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
       req.io.emit("taskAssigned", { taskId: id, userId });
       res.status(201).json({ taskId: id, userId });
-    },
+    }
   );
 });
 
