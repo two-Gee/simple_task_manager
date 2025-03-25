@@ -67,11 +67,17 @@ export default function ListPage() {
       console.log("Task deleted:", id);
       setTasks((prevTasks) => prevTasks.filter((task) => task.id.toString() !== id));
     });
+
+    socket.on("taskUpdated", (updatedTask) => {
+      setTasks((prevTasks) => updateTasks(prevTasks, updatedTask));
+    });
+
     // Cleanup on component unmount
     return () => {
       socket.emit("leaveList", listId);
       socket.off("taskAdded");
       socket.off("taskCompleted");
+      socket.off("taskUpdated");
     };
   }, [listId]);
 
@@ -116,6 +122,14 @@ export default function ListPage() {
   function setTaskCompleted(tasks: TaskData[], taskId: string) {
     let tasksNew = tasks.map((task) =>
       task.id.toString() === taskId ? { ...task, completed: !task.completed } : task,
+    );
+
+    return tasksNew;
+  }
+
+  function updateTasks(tasks: TaskData[], updatedTask: TaskData) {
+    let tasksNew = tasks.map((task) =>
+      task.id === updatedTask.id ? { ...task, dueDate: updatedTask.dueDate, title: updatedTask.title } : task,
     );
 
     return tasksNew;
@@ -209,7 +223,7 @@ export default function ListPage() {
 
       {/* Pass the selected task and isOpen to TaskEditor */}
       {selectedTask && (
-        <TaskEditor isOpen={isOpen} selectedTask={selectedTask} onOpenChange={onOpenChange} listId={listId} />
+        <TaskEditor isOpen={isOpen} selectedTask={selectedTask} setSelectedTask={setSelectedTask} onOpenChange={onOpenChange} listId={listId} />
       )}
     </DefaultLayout>
   );
