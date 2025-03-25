@@ -97,12 +97,13 @@ export default function ListPage() {
 
     socket.on("newUserAssignedToList", ({ user }) => {
       setUsers((prevUsers) => {
-      if (!prevUsers.some((existingUser) => existingUser.id === user.id)) {
-        return [...prevUsers, user];
-      }
-      return prevUsers;
+        if (!prevUsers.some((existingUser) => existingUser.id === user.id)) {
+          return [...prevUsers, user];
+        }
+        return prevUsers;
+      });
     });
-    
+
     socket.on("taskUpdated", (updatedTask) => {
       setTasks((prevTasks) => updateTasks(prevTasks, updatedTask));
     });
@@ -258,7 +259,13 @@ export default function ListPage() {
 
       {/* Pass the selected task and isOpen to TaskEditor */}
       {selectedTask && (
-        <TaskEditor isOpen={isOpen} selectedTask={selectedTask} setSelectedTask={setSelectedTask} onOpenChange={onOpenChange} listId={listId} />
+        <TaskEditor
+          isOpen={isOpen}
+          selectedTask={selectedTask}
+          setSelectedTask={setSelectedTask}
+          onOpenChange={onOpenChange}
+          listId={listId}
+        />
       )}
     </DefaultLayout>
   );
