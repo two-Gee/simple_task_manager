@@ -8,13 +8,14 @@ import type { SelectedItems, Selection } from "@heroui/react";
 import { formatDate } from "@/utils/dateFormatter";
 import { User } from "@/pages/list";
 import { useEffect, useState } from "react";
+import { pre } from "framer-motion/client";
 
 interface TaskProps {
   id: number;
   title: string;
   dueDate?: string;
   completed?: boolean;
-  prevAssignedUsers?: User[];
+  assignedUser?: User[];
   users: User[];
   openEditor: () => void;
   listId: number;
@@ -26,22 +27,21 @@ export const Task = ({
   title,
   dueDate,
   completed = false,
-  prevAssignedUsers = [],
+  assignedUser = [],
   openEditor,
   listId,
   isLocked,
   users,
 }: TaskProps) => {
-  const [assignedUsers, setAssignedUsers] = useState<Selection>(new Set([]));
 
-  useEffect(() => {
-    if (prevAssignedUsers) {
-      console.log(prevAssignedUsers);
+  // useEffect(() => {
+  //   if (prevAssignedUsers) {
+  //     console.log(prevAssignedUsers);
 
-      const userIdStrings = prevAssignedUsers.map((u) => String(u.id));
-      setAssignedUsers(new Set(userIdStrings));
-    }
-  }, []);
+  //     const userIdStrings = prevAssignedUsers.map((u) => String(u.id));
+  //     setAssignedUsers(new Set(userIdStrings));
+  //   }
+  // }, [prevAssignedUsers]);
 
   const handleTaskCompletion = () => {
     fetch(`http://localhost:4000/api/lists/${listId}/tasks/${id}/complete`, {
@@ -54,31 +54,24 @@ export const Task = ({
   };
 
   const handleSelect = (value: Selection) => {
-    const unassignedUser = Array.from(assignedUsers).find((user) => value instanceof Set && !value.has(user)) || null;
+    const unassignedUser = assignedUser.find((user) => value instanceof Set && !value.has(String(user.id))) || null;
     const newlyAssignedUser =
       value instanceof Set
-        ? Array.from(value).find((user) => assignedUsers instanceof Set && !assignedUsers.has(user))
+        ? Array.from(value).find((key) => !assignedUser.some((user) => String(user.id) === key))
         : null;
 
-    const unassignedUserId = unassignedUser !== null ? Number(unassignedUser) : null;
+    const unassignedUserId = unassignedUser !== null ? unassignedUser.id : null;
     const newlyAssignedUserId = newlyAssignedUser !== null ? Number(newlyAssignedUser) : null;
 
     if (unassignedUserId !== null) {
-      updateAssignments({ user: unassignedUserId, action: "remove", assignedUsers: value });
+      removeAssignedUser(unassignedUserId, value);
     } else if (newlyAssignedUserId !== null) {
-      updateAssignments({ user: newlyAssignedUserId, action: "add", assignedUsers: value });
+      addAssignedUser(newlyAssignedUserId, value);
     }
   };
 
-  const updateAssignments = ({
-    user,
-    action,
-    assignedUsers,
-  }: {
-    user: number | null;
-    action: string;
-    assignedUsers: Selection;
-  }) => {
+
+  const addAssignedUser = (user: number, assignedUsers: Selection) => {
     fetch(`http://localhost:4000/api/lists/${listId}/tasks/${id}/assign`, {
       method: "POST",
       headers: new Headers({
@@ -86,18 +79,33 @@ export const Task = ({
         userId: Cookies.get("userId") || "",
       }),
       body: JSON.stringify({
-        userId: user,
-        add: action === "add" ? 1 : 0,
-        remove: action === "remove" ? 1 : 0,
+        userId: user
       }),
     })
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        setAssignedUsers(assignedUsers);
       })
       .catch((error: Error) => console.error("Error posting task:", error));
-  };
+  }
+
+  const removeAssignedUser = (user: number, assignedUsers: Selection) => {
+    fetch(`http://localhost:4000/api/lists/${listId}/tasks/${id}/unassign`, {
+      method: "POST",
+      headers: new Headers({
+        "Content-Type": "application/json",
+        userId: Cookies.get("userId") || "",
+      }),
+      body: JSON.stringify({
+        userId: user,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error: Error) => console.error("Error posting task:", error));
+  }
 
   return (
     <Card className="h-25">
@@ -133,7 +141,7 @@ export const Task = ({
             label="Assigned users:"
             labelPlacement="outside"
             placeholder="Select users to assign"
-            selectedKeys={assignedUsers}
+            selectedKeys={new Set(assignedUser.map((u) => String(u.id)))}
             onSelectionChange={handleSelect}
             renderValue={(items: SelectedItems<User>) => {
               return (

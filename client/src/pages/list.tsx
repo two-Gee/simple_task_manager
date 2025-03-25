@@ -67,6 +67,43 @@ export default function ListPage() {
       console.log("Task deleted:", id);
       setTasks((prevTasks) => prevTasks.filter((task) => task.id.toString() !== id));
     });
+
+    socket.on("taskAssigned", ({ taskId, user }) => {
+      setTasks((prevTasks) => {
+        const updatedTasks = prevTasks.map((task) => {
+          if (task.id.toString() === taskId) {
+            task.assignedUsers = task.assignedUsers || [];
+            if (!task.assignedUsers.some((assignedUser) => assignedUser.id === user.id)) {
+              task.assignedUsers = [...task.assignedUsers, user];
+            }
+          }
+          return task;
+        });
+        return updatedTasks;
+      });
+    });
+
+    socket.on("taskUnassigned", ({ taskId, userId }) => {
+      setTasks((prevTasks) => {
+        const updatedTasks = prevTasks.map((task) => {
+          if (task.id.toString() === taskId) {
+            task.assignedUsers = task.assignedUsers?.filter((assignedUser) => assignedUser.id !== userId) || [];
+          }
+          return task;
+        });
+        return updatedTasks;
+      });
+    });
+
+    socket.on("newUserAssignedToList", ({ user }) => {
+      setUsers((prevUsers) => {
+      if (!prevUsers.some((existingUser) => existingUser.id === user.id)) {
+        return [...prevUsers, user];
+      }
+      return prevUsers;
+      });
+    });
+
     // Cleanup on component unmount
     return () => {
       socket.emit("leaveList", listId);
@@ -137,7 +174,7 @@ export default function ListPage() {
               <div className="w-5/6" key={task.id}>
                 <Task
                   key={task.id}
-                  prevAssignedUsers={task.assignedUsers}
+                  assignedUser={task.assignedUsers}
                   completed={task.completed}
                   dueDate={task.dueDate}
                   id={task.id}
