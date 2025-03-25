@@ -4,11 +4,9 @@ import { Chip } from "@heroui/chip";
 import { addToast, Select, SelectItem } from "@heroui/react";
 import Cookies from "js-cookie";
 import type { SelectedItems, Selection } from "@heroui/react";
-
 import { formatDate } from "@/utils/dateFormatter";
 import { User } from "@/pages/list";
-import { useEffect, useState } from "react";
-import { pre } from "framer-motion/client";
+import useSound from "use-sound";
 
 interface TaskProps {
   id: number;
@@ -33,8 +31,10 @@ export const Task = ({
   isLocked,
   users,
 }: TaskProps) => {
-
+  const [play] = useSound("/completed.mp3", { volume: 0.25 });
   const handleTaskCompletion = () => {
+    play();
+
     fetch(`http://localhost:4000/api/lists/${listId}/tasks/${id}/complete`, {
       method: "POST",
       headers: new Headers({
