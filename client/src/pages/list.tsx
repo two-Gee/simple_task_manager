@@ -15,6 +15,7 @@ import { InputTask } from "@/components/inputTask";
 import { PlusIcon } from "@/components/icons";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { socket } from "@/socket";
+import AddUser from "@/components/addUser";
 
 export type TaskData = {
   id: number;
@@ -221,8 +222,9 @@ export default function ListPage() {
   return (
     <DefaultLayout>
       <section className="flex flex-col items-center justify-center gap-4">
-        <div className="inline-block max-w-lg text-center justify-center pb-4">
-          <h1 className={title()}>{listName}</h1>
+        <div className="flex flex-row items-center justify-between w-5/6 pb-4">
+          <h1 className={`${title()} text-center flex-grow`}>{listName}</h1>
+          <AddUser className="flex-shrink-0" />
         </div>
         {!tasks && loading && (
           <Spinner className="mt-12" color="secondary" label="Loading tasks..." size="lg" variant="gradient" />

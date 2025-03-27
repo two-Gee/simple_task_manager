@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { useState } from "react";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button, Input, addToast } from "@heroui/react";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import AddIcon from "@mui/icons-material/Add";
@@ -7,12 +7,7 @@ import { useLocation } from "react-router-dom";
 // TODO: Toast einbauen für Fehlermeldungen und Erfolgsmeldungen
 // TODO: Farbe ggf. anpassen weil der Theme Toggle heller ist
 
-interface User {
-  id: number;
-  name: string;
-}
-
-const AddUser: React.FC = () => {
+const AddUser = () => {
   const location = useLocation(); // Get the location object
   const listId = location.state.id; // Get the list ID from the location object
   const [userName, setUserName] = useState<string>("");
@@ -61,7 +56,7 @@ const AddUser: React.FC = () => {
   return (
     <Dropdown>
       <DropdownTrigger>
-        <PersonAddIcon />
+        <PersonAddIcon style={{ fontSize: "2rem" }} />
       </DropdownTrigger>
       <DropdownMenu aria-label="Static Actions" onClose={() => setUserName("")} closeOnSelect={false}>
         <DropdownItem
