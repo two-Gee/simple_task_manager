@@ -26,8 +26,6 @@ export function LoginModal() {
   };
 
   const loginUser = async (userName: string) => {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
     fetch("http://localhost:4000/api/user/login", {
       method: "POST",
       headers: {
@@ -58,6 +56,7 @@ export function LoginModal() {
           color: "success",
         });
         navigate("/");
+        window.location.reload();
         setUserName("");
       });
   };
@@ -85,12 +84,14 @@ export function LoginModal() {
               <Button color="primary" onPress={handleLogin} isLoading={isLoading} fullWidth>
                 Log In
               </Button>
-              <p className="pt-5 text-xs text-right">
-                Don't have an account?
-                <Button className="text-xs" variant="light" color="primary" onPress={() => setIsRegisterOpen(true)}>
-                  Sign Up
-                </Button>
-              </p>
+              <div>
+                <p className="pt-5 text-xs text-right flex items-center justify-end gap-2">
+                  Don't have an account?
+                  <Button className="text-xs" variant="light" color="primary" onPress={() => setIsRegisterOpen(true)}>
+                    Sign Up
+                  </Button>
+                </p>
+              </div>
             </div>
           </ModalFooter>
         </ModalContent>
