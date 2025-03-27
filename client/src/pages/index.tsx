@@ -81,7 +81,7 @@ export default function IndexPage() {
       <section className="flex flex-col items-center py-8 md:py-10">
         {isInputOpen ? (
           <div ref={inputRef} className="w-5/6">
-            <CreateListComponent setLists={setLists} lists={lists} />
+            <CreateListComponent setLists={setLists} lists={lists} closeInput={() => setIsInputOpen(false)} />
           </div>
         ) : (
           <Card className="w-5/6">

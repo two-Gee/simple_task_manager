@@ -10,9 +10,10 @@ import Cookies from "js-cookie";
 interface CreateListProps {
   setLists: React.Dispatch<React.SetStateAction<ListData[]>>;
   lists: ListData[];
+  closeInput: () => void;
 }
 
-export const CreateListComponent = ({ setLists, lists }: CreateListProps) => {
+export const CreateListComponent = ({ setLists, lists, closeInput }: CreateListProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
   const onSubmit = async (event: { preventDefault: () => void; currentTarget: HTMLFormElement | undefined }) => {
@@ -28,7 +29,7 @@ export const CreateListComponent = ({ setLists, lists }: CreateListProps) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        name: name,
+        name: data.name,
         userId: Cookies.get("userId"),
       }),
     })
@@ -36,12 +37,11 @@ export const CreateListComponent = ({ setLists, lists }: CreateListProps) => {
       .then((data) => {
         console.log("New list created:", data);
         setLists([...lists, data]);
+        closeInput();
         setName("");
       })
-      .catch((error) => console.error("Error creating list:", error));
-
-    setName("");
-    setIsLoading(false);
+      .catch((error) => console.error("Error creating list:", error))
+      .finally(() => setIsLoading(false));
   };
 
   return (
@@ -55,7 +55,7 @@ export const CreateListComponent = ({ setLists, lists }: CreateListProps) => {
               errorMessage="Please enter a list name"
               label="List"
               labelPlacement="outside"
-              name="title"
+              name="name"
               placeholder="Add a new List"
               startContent={<PlusIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />}
               type="text"

@@ -6,6 +6,7 @@ import { Button } from "@heroui/button";
 import { useState } from "react";
 import { DateValue } from "@heroui/react";
 import { getLocalTimeZone, today } from "@internationalized/date";
+import Cookies from "js-cookie";
 
 import { PlusIcon } from "./icons";
 
@@ -14,13 +15,13 @@ interface InputTaskProps {
   listId: number;
   setTasks: React.Dispatch<React.SetStateAction<TaskData[]>>;
   tasks: TaskData[];
+  closeInput: () => void;
 }
 
-export const InputTask = ({ listId, setTasks, tasks }: InputTaskProps) => {
+export const InputTask = ({ listId, setTasks, tasks, closeInput }: InputTaskProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState<DateValue | null>(null);
-  //   const Cookies = require("js-cookie");
 
   const onSubmit = async (event: { preventDefault: () => void; currentTarget: HTMLFormElement | undefined }) => {
     event.preventDefault();
@@ -33,7 +34,7 @@ export const InputTask = ({ listId, setTasks, tasks }: InputTaskProps) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        userId: "1", //Cookies.get("userId"),
+        userId: Cookies.get("userId") || "",
       },
       body: JSON.stringify({
         title: data.title,
@@ -43,12 +44,12 @@ export const InputTask = ({ listId, setTasks, tasks }: InputTaskProps) => {
       .then((response) => response.json())
       .then((data) => {
         setTasks(() => [...tasks, data]);
+        closeInput();
+        setTitle("");
+        setDueDate(null);
       })
-      .catch((error) => console.error("Error posting task:", error));
-
-    setTitle("");
-    setDueDate(null);
-    setIsLoading(false);
+      .catch((error) => console.error("Error posting task:", error))
+      .finally(() => setIsLoading(false));
   };
 
   return (

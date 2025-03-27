@@ -287,7 +287,7 @@ export default function ListPage() {
       <section className="mt-auto flex flex-col items-center py-20">
         {isInputOpen ? (
           <div ref={inputRef} className="w-5/6">
-            <InputTask listId={listId} setTasks={setTasks} tasks={tasks} />
+            <InputTask listId={listId} setTasks={setTasks} tasks={tasks} closeInput={() => setIsInputOpen(false)} />
           </div>
         ) : (
           <Card className="w-5/6">
