@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button, Input, addToast } from "@heroui/react";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import AddIcon from "@mui/icons-material/Add";
 import Cookies from "js-cookie";
 import { useLocation } from "react-router-dom";
+import { PlusIcon } from "./icons";
 // TODO: Toast einbauen für Fehlermeldungen und Erfolgsmeldungen
 // TODO: Farbe ggf. anpassen weil der Theme Toggle heller ist
 
@@ -56,14 +56,17 @@ const AddUser = () => {
   return (
     <Dropdown>
       <DropdownTrigger>
-        <PersonAddIcon style={{ fontSize: "2rem" }} />
+        <Button isIconOnly style={{ padding: 0, minWidth: "auto", background: "none", boxShadow: "none" }}>
+          <PersonAddIcon style={{ fontSize: "2rem" }} />
+        </Button>
       </DropdownTrigger>
-      <DropdownMenu aria-label="Static Actions" onClose={() => setUserName("")} closeOnSelect={false}>
+      <DropdownMenu aria-label="Static Actions" onClose={() => setUserName("")} closeOnSelect={false} variant="light">
         <DropdownItem
-          key={"test"}
+          key="addUser"
+          textValue="Add user"
           startContent={
-            <Button isIconOnly aria-label="Take a photo" color="primary" variant="faded" onPress={handleAddUser}>
-              <AddIcon />
+            <Button isIconOnly aria-label="Add user to list" color="secondary" variant="solid" onPress={handleAddUser}>
+              <PlusIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" color={"white"} />
             </Button>
           }
         >
