@@ -7,6 +7,7 @@ import { ListComponent } from "@/components/listComponent";
 import { CreateListComponent } from "@/components/createListComponent";
 import { socket } from "@/socket";
 import Cookies from "js-cookie";
+import { useClickOutside } from "@/hooks/useClickOutside";
 
 export type ListData = {
   id: number;
@@ -19,6 +20,11 @@ export default function IndexPage() {
   const [isInputOpen, setIsInputOpen] = useState(false);
   const inputRef = useRef<HTMLDivElement>(null);
   const [userId, setUserId] = useState<string | undefined>(Cookies.get("userId"));
+
+  // Use custom hook to close the task input when clicking outside
+  useClickOutside(inputRef, () => {
+    setIsInputOpen(false);
+  });
 
   useEffect(() => {
     setUserId(Cookies.get("userId"));
@@ -58,7 +64,7 @@ export default function IndexPage() {
       <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
         <div className="inline-block max-w-lg text-center justify-center">
           <span className={title()}>Task&nbsp;</span>
-          <span className={title({ color: "violet" })}>Together&nbsp;</span>
+          <span className={title({ color: "violet" })}>Together</span>
           <div
             className={subtitle({
               class: "mt-4",
