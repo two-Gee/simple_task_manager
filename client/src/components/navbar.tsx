@@ -2,7 +2,6 @@ import { Link } from "@heroui/link";
 import { Navbar as HeroUINavbar, NavbarBrand, NavbarContent, NavbarItem } from "@heroui/navbar";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { Logo } from "./icons";
-import AddUser from "./addUser";
 import { useLocation } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
@@ -34,11 +33,6 @@ export const Navbar = () => {
       </NavbarContent>
 
       <NavbarContent className="hidden sm:flex basis-1/5 sm:basis-full" justify="end">
-        {location.pathname.includes("/list") && ( // Conditionally render AddUser based on the route
-          <NavbarItem className="hidden sm:flex gap-2">
-            <AddUser />
-          </NavbarItem>
-        )}
         <NavbarItem className="hidden sm:flex gap-2">
           <Dropdown>
             <DropdownTrigger>
