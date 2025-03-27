@@ -1,8 +1,5 @@
 import { Link } from "@heroui/link";
 import { Navbar as HeroUINavbar, NavbarBrand, NavbarContent, NavbarItem } from "@heroui/navbar";
-import { link as linkStyles } from "@heroui/theme";
-import clsx from "clsx";
-import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { Logo } from "./icons";
 import AddUser from "./addUser";
@@ -12,36 +9,28 @@ import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/d
 import { Button } from "@heroui/button";
 import Cookies from "js-cookie";
 import { useUser } from "../context/UserContext";
-
+import { Tooltip } from "@heroui/react";
 
 export const Navbar = () => {
   const { logout } = useUser();
   const location = useLocation(); // Use useLocation to get the current route
   const username = Cookies.get("username");
+
   return (
     <HeroUINavbar maxWidth="full" position="sticky">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand className="gap-3 max-w-fit">
-          <Logo size={70} />
+          <Tooltip
+            isDisabled={location.pathname === "/"}
+            content="Click to navigate home"
+            showArrow={true}
+            placement="bottom-start"
+          >
+            <Link color="foreground" href="/">
+              <Logo size={70} />
+            </Link>
+          </Tooltip>
         </NavbarBrand>
-        <div className="hidden lg:flex gap-4 justify-start ml-2">
-          {siteConfig.navItems.map((item) => (
-            <NavbarItem key={item.href}>
-              <Link
-                className={clsx(
-                  linkStyles({
-                    color: "foreground",
-                  }),
-                  "data-[active=true]:text-primary data-[active=true]:font-medium",
-                )}
-                color="foreground"
-                href={item.href}
-              >
-                {item.label}
-              </Link>
-            </NavbarItem>
-          ))}
-        </div>
       </NavbarContent>
 
       <NavbarContent className="hidden sm:flex basis-1/5 sm:basis-full" justify="end">
@@ -57,7 +46,11 @@ export const Navbar = () => {
             </DropdownTrigger>
             <DropdownMenu aria-label="Dropdown menu with description" variant="faded">
               <DropdownItem key={"username"}>Logged in as: {username}</DropdownItem>
-              <DropdownItem key={"logOut"}><Button color="danger" fullWidth onPress={logout}>Logout</Button></DropdownItem>
+              <DropdownItem key={"logOut"}>
+                <Button color="danger" fullWidth onPress={logout}>
+                  Logout
+                </Button>
+              </DropdownItem>
             </DropdownMenu>
           </Dropdown>
         </NavbarItem>
