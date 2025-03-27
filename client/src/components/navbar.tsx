@@ -36,7 +36,9 @@ export const Navbar = () => {
         <NavbarItem className="hidden sm:flex gap-2">
           <Dropdown>
             <DropdownTrigger>
-              <PersonIcon />
+              <Button isIconOnly style={{ padding: 0, minWidth: "auto", background: "none", boxShadow: "none" }}>
+                <PersonIcon />
+              </Button>
             </DropdownTrigger>
             <DropdownMenu aria-label="Dropdown menu with description" variant="faded">
               <DropdownItem key={"username"}>Logged in as: {username}</DropdownItem>
