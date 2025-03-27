@@ -5,7 +5,6 @@ import ListPage from "@/pages/list";
 import { LoginModal } from "./components/loginModal";
 import { UserProvider } from "./context/UserContext";
 import { SocketListener } from "./hooks/socketListener";
-import { useEffect } from "react";
 import { HeroUIProvider } from "@heroui/system";
 
 function App() {

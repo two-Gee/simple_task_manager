@@ -14,15 +14,8 @@ export type ListData = {
   isShared: boolean;
 };
 
-export const ListboxWrapper = ({ children }) => (
-  <div className="w-full max-w-[260px] border-small px-1 py-2 rounded-small border-default-200 dark:border-default-100">
-    {children}
-  </div>
-);
-
 export default function IndexPage() {
   const [lists, setLists] = useState<ListData[]>([]);
-  const [newListName, setNewListName] = useState("");
   const [isInputOpen, setIsInputOpen] = useState(false);
   const inputRef = useRef<HTMLDivElement>(null);
   const [userId, setUserId] = useState<string | undefined>(Cookies.get("userId"));
