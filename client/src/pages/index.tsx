@@ -91,6 +91,12 @@ export default function IndexPage() {
                 startContent={<AddIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />}
                 type="text"
                 variant="faded"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    setIsInputOpen(true);
+                  }
+                }}
               />
             </CardBody>
           </Card>

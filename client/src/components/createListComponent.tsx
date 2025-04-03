@@ -50,6 +50,7 @@ export const CreateListComponent = ({ setLists, lists, closeInput }: CreateListP
         <Form className="w-full gap-6" onSubmit={onSubmit}>
           <div className="flex flex-row w-full gap-6">
             <Input
+              autoFocus
               isClearable
               isRequired
               errorMessage="Please enter a list name"

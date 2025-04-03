@@ -58,6 +58,7 @@ export const InputTask = ({ listId, setTasks, tasks, closeInput }: InputTaskProp
         <Form className="w-full gap-6" onSubmit={onSubmit}>
           <div className="flex flex-row w-full gap-6">
             <Input
+              autoFocus
               isClearable
               isRequired
               errorMessage="Please enter a task"
