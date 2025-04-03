@@ -1,14 +1,13 @@
 import { Link } from "@heroui/link";
 import { Navbar as HeroUINavbar, NavbarBrand, NavbarContent, NavbarItem } from "@heroui/navbar";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { Logo } from "./icons";
 import { useLocation } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
 import { Button } from "@heroui/button";
 import Cookies from "js-cookie";
 import { useUser } from "../context/UserContext";
-import { Tooltip } from "@heroui/react";
+import { Image, Tooltip } from "@heroui/react";
 
 export const Navbar = () => {
   const { logout } = useUser();
@@ -19,14 +18,9 @@ export const Navbar = () => {
     <HeroUINavbar maxWidth="full" position="sticky">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand className="gap-3 max-w-fit">
-          <Tooltip
-            isDisabled={location.pathname === "/"}
-            content="Click to navigate home"
-            showArrow={true}
-            placement="bottom-start"
-          >
-            <Link color="foreground" href="/">
-              <Logo size={70} />
+          <Tooltip content="Click to navigate home" showArrow={true} placement="bottom-start">
+            <Link color="foreground" href="/" style={{ borderRadius: "40px" }}>
+              <Image src="/logo.png" height="48px" width="55px" />
             </Link>
           </Tooltip>
         </NavbarBrand>
@@ -40,9 +34,18 @@ export const Navbar = () => {
                 <PersonIcon />
               </Button>
             </DropdownTrigger>
-            <DropdownMenu aria-label="Dropdown menu with description" variant="faded">
+            <DropdownMenu aria-label="Dropdown menu with description" variant="light" disabledKeys={["username"]}>
               <DropdownItem key={"username"}>Logged in as: {username}</DropdownItem>
-              <DropdownItem key={"logOut"}>
+              <DropdownItem
+                key={"logOut"}
+                style={{ padding: 0 }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    logout();
+                  }
+                }}
+              >
                 <Button color="danger" fullWidth onPress={logout}>
                   Logout
                 </Button>
