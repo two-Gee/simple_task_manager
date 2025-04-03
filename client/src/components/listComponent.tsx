@@ -16,13 +16,14 @@ export const ListComponent = ({ id, name, isShared }: ListProps) => {
     }); // Navigate to the list page with the list ID
   };
   return (
-    <Card className="h-20 w-5/6">
-      <CardBody
-        onClick={() => {
-          handleCardClick();
-        }}
-        className="flex flex-row justify-between items-center p-6"
-      >
+    <Card
+      className="h-20 w-5/6"
+      isPressable
+      onPress={() => {
+        handleCardClick();
+      }}
+    >
+      <CardBody className="flex flex-row justify-between items-center p-6">
         <div className="flex flex-col gap-2">
           <span className="text-base font-medium text-xl">{name}</span>
         </div>
