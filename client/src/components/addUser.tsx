@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button, Input, addToast } from "@heroui/react";
+import { Button, Input, addToast, Popover, PopoverTrigger, PopoverContent } from "@heroui/react";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import Cookies from "js-cookie";
 import { useLocation } from "react-router-dom";
@@ -54,31 +54,33 @@ const AddUser = () => {
   };
 
   return (
-    <Dropdown>
-      <DropdownTrigger>
+    <Popover offset={10} placement="bottom" onClose={() => setUserName("")}>
+      <PopoverTrigger>
         <Button isIconOnly style={{ padding: 0, minWidth: "auto", background: "none", boxShadow: "none" }}>
           <PersonAddIcon style={{ fontSize: "2rem" }} />
         </Button>
-      </DropdownTrigger>
-      <DropdownMenu aria-label="Static Actions" onClose={() => setUserName("")} closeOnSelect={false} variant="light">
-        <DropdownItem
-          key="addUser"
-          textValue="Add user"
-          startContent={
-            <Button isIconOnly aria-label="Add user to list" color="secondary" variant="solid" onPress={handleAddUser}>
-              <PlusIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" color={"white"} />
-            </Button>
-          }
-        >
+      </PopoverTrigger>
+      <PopoverContent className="p-2">
+        <div className="flex flex-row gap-2">
           <Input
+            autoFocus
             name="listName"
             value={userName}
             onChange={(e) => setUserName(e.target.value)}
             placeholder="Add user to list"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleAddUser();
+              }
+            }}
           />
-        </DropdownItem>
-      </DropdownMenu>
-    </Dropdown>
+          <Button isIconOnly aria-label="Add user to list" color="secondary" variant="solid" onPress={handleAddUser}>
+            <PlusIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" color={"white"} />
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };
 
