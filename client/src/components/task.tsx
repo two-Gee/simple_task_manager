@@ -61,7 +61,6 @@ export const Task = ({
     }
   };
 
-
   const addAssignedUser = (user: number, assignedUsers: Selection) => {
     fetch(`http://localhost:4000/api/lists/${listId}/tasks/${id}/assign`, {
       method: "POST",
@@ -70,7 +69,7 @@ export const Task = ({
         userId: Cookies.get("userId") || "",
       }),
       body: JSON.stringify({
-        userId: user
+        userId: user,
       }),
     })
       .then((response) => response.json())
@@ -78,7 +77,7 @@ export const Task = ({
         console.log(data);
       })
       .catch((error: Error) => console.error("Error posting task:", error));
-  }
+  };
 
   const removeAssignedUser = (user: number, assignedUsers: Selection) => {
     fetch(`http://localhost:4000/api/lists/${listId}/tasks/${id}/unassign`, {
@@ -96,27 +95,40 @@ export const Task = ({
         console.log(data);
       })
       .catch((error: Error) => console.error("Error posting task:", error));
-  }
+  };
 
   return (
-    <Card className="h-25">
-      <CardBody
-        onClick={() => {
-          if (isLocked) {
-            addToast({
-              title: "Task is locked",
-              description: "You cannot edit this task",
-              color: "danger",
-            });
-          } else {
-            openEditor();
-          }
-        }}
-      >
+    <Card
+      className="h-25 w-full"
+      isPressable
+      onPress={() => {
+        if (isLocked) {
+          addToast({
+            title: "Task is locked",
+            description: "You cannot edit this task",
+            color: "danger",
+          });
+        } else {
+          openEditor();
+        }
+      }}
+    >
+      <CardBody>
         <div className="flex flex-row justify-between items-center gap-4">
           {/* Left side: checkbox, title, and due date */}
           <div className="flex flex-col gap-2">
-            <Checkbox lineThrough color="secondary" isSelected={completed} onChange={() => handleTaskCompletion()}>
+            <Checkbox
+              lineThrough
+              color="secondary"
+              isSelected={completed}
+              onChange={() => handleTaskCompletion()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleTaskCompletion();
+                }
+              }}
+            >
               <span className="text-base">{title}</span>
             </Checkbox>
             <span className="text-xs text-default-500 ml-7">
