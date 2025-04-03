@@ -86,6 +86,7 @@ export default function IndexPage() {
           <Card className="w-5/6">
             <CardBody className="flex flex-col gap-6" onClick={() => setIsInputOpen(true)}>
               <Input
+                autoFocus
                 isReadOnly
                 placeholder="Add a new List"
                 startContent={<AddIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />}
