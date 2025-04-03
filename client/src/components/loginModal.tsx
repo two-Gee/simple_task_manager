@@ -7,7 +7,6 @@ import { RegisterModal } from "./registerModal";
 export function LoginModal() {
   const { isLoggedIn, login } = useUser();
   const [errorMessage, setErrorMessage] = React.useState("");
-  const [isInvalid, setIsInvalid] = React.useState(false);
   const [userName, setUserName] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = React.useState(false);
@@ -41,11 +40,10 @@ export function LoginModal() {
         } else {
           addToast({
             title: "Invalid Username",
-            description: "Please enter a valid username.",
+            description: "The username you entered is not recognized. Please try again or sign up for a new account.",
             color: "danger",
           });
-          setIsInvalid(true);
-          setErrorMessage("Invalid username");
+          setErrorMessage("Please enter a valid username.");
         }
       })
       .then((data) => {
@@ -58,6 +56,15 @@ export function LoginModal() {
         navigate("/");
         window.location.reload();
         setUserName("");
+      })
+      .catch((err) => {
+        console.error("Login failed:", err);
+        setErrorMessage("Unable to log in.");
+        addToast({
+          title: "Registration Failed",
+          description: "An error occured while trying to log in. Please try again later.",
+          color: "danger",
+        });
       });
   };
 
@@ -69,19 +76,26 @@ export function LoginModal() {
           <ModalBody>
             <div className="flex flex-col gap-4">
               <Input
+                autoFocus
                 label="Username"
                 placeholder="Enter your username"
                 type="text"
                 value={userName}
                 onValueChange={setUserName}
-                isInvalid={isInvalid}
+                isInvalid={errorMessage !== ""}
                 errorMessage={errorMessage}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleLogin();
+                  }
+                }}
               />
             </div>
           </ModalBody>
           <ModalFooter>
             <div className="flex flex-col gap-2 w-full">
-              <Button color="primary" onPress={handleLogin} isLoading={isLoading} fullWidth>
+              <Button color="primary" onPress={handleLogin} isLoading={isLoading} fullWidth type="submit">
                 Log In
               </Button>
               <div>
