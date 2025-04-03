@@ -1,26 +1,10 @@
 // RegisterModal.tsx
 import React from "react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Input,
-  addToast,
-} from "@heroui/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, addToast } from "@heroui/react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 
-
-export function RegisterModal({
-  isOpen,
-  onClose,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-}) {
+export function RegisterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [username, setUsername] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
@@ -41,7 +25,7 @@ export function RegisterModal({
           description: "That username might already exist or is invalid.",
           color: "danger",
         });
-        setErrorMessage("Registration failed");
+        setErrorMessage("Please enter a valid username.");
       } else {
         const data = await response.json();
         login(data.id, username);
@@ -56,7 +40,12 @@ export function RegisterModal({
       }
     } catch (err) {
       console.error("Error registering user:", err);
-      setErrorMessage("Error registering user");
+      setErrorMessage("Error registering user.");
+      addToast({
+        title: "Registration Failed",
+        description: "An error occured while trying to register the user. Please try again later.",
+        color: "danger",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -69,22 +58,25 @@ export function RegisterModal({
         <ModalBody>
           <div className="flex flex-col gap-4">
             <Input
+              autoFocus
               label="Username"
               placeholder="Enter desired username"
               type="text"
               value={username}
               onValueChange={setUsername}
+              isInvalid={errorMessage !== ""}
               errorMessage={errorMessage}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleRegister();
+                }
+              }}
             />
           </div>
         </ModalBody>
         <ModalFooter>
-          <Button
-            color="primary"
-            onPress={handleRegister}
-            isLoading={isLoading}
-            fullWidth
-          >
+          <Button color="primary" onPress={handleRegister} isLoading={isLoading} fullWidth>
             Sign Up
           </Button>
           <Button variant="light" onPress={() => onClose()}>
