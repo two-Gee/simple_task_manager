@@ -59,7 +59,6 @@ export const InputTask = ({ listId, setTasks, tasks, closeInput }: InputTaskProp
           <div className="flex flex-row w-full gap-6">
             <Input
               autoFocus
-              isClearable
               isRequired
               errorMessage="Please enter a task"
               label="Task"
