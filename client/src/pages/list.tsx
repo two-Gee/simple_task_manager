@@ -24,6 +24,7 @@ export type TaskData = {
   completed?: boolean;
   assignedUsers?: User[];
   isLocked: boolean;
+  isTempCompleted?: boolean;
 };
 
 export type User = {
@@ -61,7 +62,29 @@ export default function ListPage() {
     });
 
     socket.on("taskCompleted", ({ taskId }) => {
-      setTasks((prevTasks) => setTaskCompleted(prevTasks, taskId));
+      // Step 1: mark the task as temp-completed but not fully completed yet
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.id.toString() === taskId
+            ? {
+                ...task,
+                isTempCompleted: task.completed ? false : true,
+                completed: !task.completed ? task.completed : !task.completed,
+              }
+            : task,
+        ),
+      );
+
+      // Step 2: after a delay, mark it truly completed
+      setTimeout(() => {
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id.toString() === taskId
+              ? { ...task, completed: task.isTempCompleted ? !task.completed : task.completed, isTempCompleted: false }
+              : task,
+          ),
+        );
+      }, 1000); // 2-second delay
     });
 
     socket.on("taskDeleted", (id) => {
@@ -203,14 +226,6 @@ export default function ListPage() {
       .catch((error) => console.error("Error locking task:", error));
   };
 
-  function setTaskCompleted(tasks: TaskData[], taskId: string) {
-    let tasksNew = tasks.map((task) =>
-      task.id.toString() === taskId ? { ...task, completed: !task.completed } : task,
-    );
-
-    return tasksNew;
-  }
-
   function updateTasks(tasks: TaskData[], updatedTask: TaskData) {
     let tasksNew = tasks.map((task) =>
       task.id === updatedTask.id ? { ...task, dueDate: updatedTask.dueDate, title: updatedTask.title } : task,
@@ -229,15 +244,16 @@ export default function ListPage() {
         {!tasks && loading && (
           <Spinner className="mt-12" color="secondary" label="Loading tasks..." size="lg" variant="gradient" />
         )}
-        {tasks && tasks.filter((task) => !task.completed).length !== 0 ? (
+        {tasks && tasks.filter((task) => !task.completed || task.isTempCompleted).length !== 0 ? (
           tasks
-            .filter((task) => !task.completed)
+            .filter((task) => !task.completed || task.isTempCompleted)
             .map((task) => (
               <div className="w-5/6" key={task.id}>
                 <Task
                   key={task.id}
                   assignedUser={task.assignedUsers}
                   completed={task.completed}
+                  isTempCompleted={task.isTempCompleted}
                   dueDate={task.dueDate}
                   id={task.id}
                   listId={listId}
@@ -277,6 +293,7 @@ export default function ListPage() {
                             openEditor={() => handleOpenEditor(task)}
                             title={task.title}
                             isLocked={task.isLocked}
+                            lockedBy={task.lockedBy}
                           />
                         </div>
                       ))}

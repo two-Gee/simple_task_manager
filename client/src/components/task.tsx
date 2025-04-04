@@ -13,6 +13,7 @@ interface TaskProps {
   title: string;
   dueDate?: string;
   completed?: boolean;
+  isTempCompleted?: boolean;
   assignedUser?: User[];
   users: User[];
   openEditor: () => void;
@@ -25,6 +26,7 @@ export const Task = ({
   title,
   dueDate,
   completed = false,
+  isTempCompleted = false,
   assignedUser = [],
   openEditor,
   listId,
@@ -102,10 +104,11 @@ export const Task = ({
       className="h-25 w-full"
       isPressable
       onPress={() => {
+        console.log("pressed");
         if (isLocked) {
           addToast({
             title: "Task is locked",
-            description: "You cannot edit this task",
+            description: "You cannot edit this task while another user is editing.",
             color: "danger",
           });
         } else {
@@ -120,11 +123,15 @@ export const Task = ({
             <Checkbox
               lineThrough
               color="secondary"
-              isSelected={completed}
-              onChange={() => handleTaskCompletion()}
+              isSelected={completed || isTempCompleted}
+              onChange={() => {
+                console.log("onChange");
+                handleTaskCompletion();
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
+                  e.stopPropagation();
                   handleTaskCompletion();
                 }
               }}
