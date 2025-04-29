@@ -17,14 +17,8 @@ export type ListData = {
 
 export default function IndexPage() {
   const [lists, setLists] = useState<ListData[]>([]);
-  const [isInputOpen, setIsInputOpen] = useState(false);
   const inputRef = useRef<HTMLDivElement>(null);
   const [userId, setUserId] = useState<string | undefined>(Cookies.get("userId"));
-
-  // Use custom hook to close the task input when clicking outside
-  useClickOutside(inputRef, () => {
-    setIsInputOpen(false);
-  });
 
   useEffect(() => {
     setUserId(Cookies.get("userId"));
@@ -78,30 +72,9 @@ export default function IndexPage() {
         ))}
       </section>
       <section className="flex flex-col items-center py-8 md:py-10">
-        {isInputOpen ? (
-          <div ref={inputRef} className="w-5/6">
-            <CreateListComponent setLists={setLists} lists={lists} closeInput={() => setIsInputOpen(false)} />
-          </div>
-        ) : (
-          <Card className="w-5/6">
-            <CardBody className="flex flex-col gap-6" onClick={() => setIsInputOpen(true)}>
-              <Input
-                autoFocus
-                isReadOnly
-                placeholder="Add a new List"
-                startContent={<AddIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />}
-                type="text"
-                variant="faded"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    setIsInputOpen(true);
-                  }
-                }}
-              />
-            </CardBody>
-          </Card>
-        )}
+        <div ref={inputRef} className="w-5/6">
+          <CreateListComponent setLists={setLists} lists={lists} />
+        </div>
       </section>
     </DefaultLayout>
   );

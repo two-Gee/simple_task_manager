@@ -2,7 +2,7 @@ import { Input } from "@heroui/input";
 import { Card, CardBody } from "@heroui/card";
 import { Form } from "@heroui/form";
 import { Button } from "@heroui/button";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PlusIcon } from "./icons";
 import { ListData } from "@/pages";
 import Cookies from "js-cookie";
@@ -10,12 +10,19 @@ import Cookies from "js-cookie";
 interface CreateListProps {
   setLists: React.Dispatch<React.SetStateAction<ListData[]>>;
   lists: ListData[];
-  closeInput: () => void;
 }
 
-export const CreateListComponent = ({ setLists, lists, closeInput }: CreateListProps) => {
+export const CreateListComponent = ({ setLists, lists }: CreateListProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
   const onSubmit = async (event: { preventDefault: () => void; currentTarget: HTMLFormElement | undefined }) => {
     event.preventDefault();
 
@@ -37,7 +44,6 @@ export const CreateListComponent = ({ setLists, lists, closeInput }: CreateListP
       .then((data) => {
         console.log("New list created:", data);
         setLists([...lists, data]);
-        closeInput();
         setName("");
       })
       .catch((error) => console.error("Error creating list:", error))
@@ -52,6 +58,7 @@ export const CreateListComponent = ({ setLists, lists, closeInput }: CreateListP
             <Input
               autoFocus
               isRequired
+              ref={inputRef}
               errorMessage="Please enter a list name"
               label="List"
               labelPlacement="outside"

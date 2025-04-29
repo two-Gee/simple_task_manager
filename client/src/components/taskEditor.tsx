@@ -17,6 +17,22 @@ interface TaskEditorProps {
   listId: number;
 }
 
+export const unlockTask = (taskId: number, listId: number) => {
+  console.log("Unlocking task", taskId);
+  fetch(`http://localhost:4000/api/lists/${listId}/tasks/${taskId}/unlock`, {
+    method: "POST",
+    headers: new Headers({
+      "Content-Type": "application/json",
+      userId: Cookies.get("userId") || "",
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(data);
+    })
+    .catch((error) => console.error("Error unlocking task:", error));
+};
+
 export const TaskEditor = ({ isOpen, onOpenChange, selectedTask, setSelectedTask, listId }: TaskEditorProps) => {
   const [dueDate, setDueDate] = useState<DateValue | null>(null);
   const [title, setTitle] = useState(selectedTask?.title);
@@ -48,23 +64,6 @@ export const TaskEditor = ({ isOpen, onOpenChange, selectedTask, setSelectedTask
       }, 0);
     }
   };
-
-
-  const unlockTask = (taskId: number) => {
-    console.log("Unlocking task", taskId);
-    fetch(`http://localhost:4000/api/lists/${listId}/tasks/${taskId}/unlock`, {
-      method: "POST",
-      headers: new Headers({
-        "Content-Type": "application/json",
-        userId: Cookies.get("userId") || "",
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-      })
-      .catch((error) => console.error("Error unlocking task:", error));
-  }
 
   useEffect(() => {
     setTitle(selectedTask?.title || "");
@@ -119,7 +118,7 @@ export const TaskEditor = ({ isOpen, onOpenChange, selectedTask, setSelectedTask
 
   const handleOpenChange = (open: boolean) => {
     if (!open && selectedTask != null) {
-      unlockTask(selectedTask?.id);
+      unlockTask(selectedTask?.id, listId);
       setSelectedTask(null);
     }
     onOpenChange(open);
@@ -130,10 +129,20 @@ export const TaskEditor = ({ isOpen, onOpenChange, selectedTask, setSelectedTask
       <DrawerContent>
         {(onClose) => (
           <>
-            <DrawerHeader className="cursor-pointer text-3xl" onClick={isEditing ? undefined : handleHeaderClick}>
+            <DrawerHeader
+              className="cursor-pointer text-3xl"
+              onClick={isEditing ? undefined : handleHeaderClick}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  if (!isEditing) handleHeaderClick();
+                }
+              }}
+            >
               {isEditing ? (
                 <div ref={inputRef} className="w-5/6">
                   <Input
+                    autoFocus
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     onBlur={handleInputBlur}

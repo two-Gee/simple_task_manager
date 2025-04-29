@@ -7,7 +7,10 @@ import { PlusIcon } from "./icons";
 // TODO: Toast einbauen für Fehlermeldungen und Erfolgsmeldungen
 // TODO: Farbe ggf. anpassen weil der Theme Toggle heller ist
 
-const AddUser = () => {
+interface AddUserProps {
+  className?: string;
+}
+const AddUser = ({ className }: AddUserProps) => {
   const location = useLocation(); // Get the location object
   const listId = location.state.id; // Get the list ID from the location object
   const [userName, setUserName] = useState<string>("");
@@ -55,7 +58,7 @@ const AddUser = () => {
 
   return (
     <Popover offset={10} placement="bottom" onClose={() => setUserName("")}>
-      <PopoverTrigger>
+      <PopoverTrigger className={className}>
         <Button isIconOnly style={{ padding: 0, minWidth: "auto", background: "none", boxShadow: "none" }}>
           <PersonAddIcon style={{ fontSize: "2rem" }} />
         </Button>

@@ -3,7 +3,7 @@ import { Card, CardBody } from "@heroui/card";
 import { DatePicker } from "@heroui/date-picker";
 import { Form } from "@heroui/form";
 import { Button } from "@heroui/button";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DateValue } from "@heroui/react";
 import { getLocalTimeZone, today } from "@internationalized/date";
 import Cookies from "js-cookie";
@@ -15,11 +15,17 @@ interface InputTaskProps {
   listId: number;
   setTasks: React.Dispatch<React.SetStateAction<TaskData[]>>;
   tasks: TaskData[];
-  closeInput: () => void;
 }
 
-export const InputTask = ({ listId, setTasks, tasks, closeInput }: InputTaskProps) => {
+export const InputTask = ({ listId, setTasks, tasks }: InputTaskProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState<DateValue | null>(null);
 
@@ -44,14 +50,12 @@ export const InputTask = ({ listId, setTasks, tasks, closeInput }: InputTaskProp
       .then((response) => response.json())
       .then((data) => {
         setTasks(() => [...tasks, data]);
-        closeInput();
         setTitle("");
         setDueDate(null);
       })
       .catch((error) => console.error("Error posting task:", error))
       .finally(() => setIsLoading(false));
   };
-
   return (
     <Card>
       <CardBody>
@@ -60,6 +64,7 @@ export const InputTask = ({ listId, setTasks, tasks, closeInput }: InputTaskProp
             <Input
               autoFocus
               isRequired
+              ref={inputRef}
               errorMessage="Please enter a task"
               label="Task"
               labelPlacement="outside"

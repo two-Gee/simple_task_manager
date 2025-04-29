@@ -10,7 +10,7 @@ import { Accordion, AccordionItem } from "@heroui/accordion";
 import { Image } from "@heroui/image";
 import { Task } from "@/components/task";
 import DefaultLayout from "@/layouts/default";
-import { TaskEditor } from "@/components/taskEditor";
+import { TaskEditor, unlockTask } from "@/components/taskEditor";
 import { InputTask } from "@/components/inputTask";
 import { PlusIcon } from "@/components/icons";
 import { useClickOutside } from "@/hooks/useClickOutside";
@@ -39,15 +39,20 @@ export default function ListPage() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [isInputOpen, setIsInputOpen] = useState(false);
   const [tasks, setTasks] = useState<TaskData[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const inputRef = useRef<HTMLDivElement>(null);
 
-  // Use custom hook to close the task input when clicking outside
-  useClickOutside(inputRef, () => {
-    setIsInputOpen(false);
-  });
+  useEffect(() => {
+    const onBeforeUnload = () => {
+      if (selectedTask?.id !== undefined) {
+        unlockTask(selectedTask.id, listId);
+      }
+    };
+
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [selectedTask]);
 
   useEffect(() => {
     // Join the room with the listId
@@ -293,7 +298,6 @@ export default function ListPage() {
                             openEditor={() => handleOpenEditor(task)}
                             title={task.title}
                             isLocked={task.isLocked}
-                            lockedBy={task.lockedBy}
                           />
                         </div>
                       ))}
@@ -304,29 +308,9 @@ export default function ListPage() {
         </section>
       )}
       <section className="mt-auto flex flex-col items-center py-20">
-        {isInputOpen ? (
-          <div ref={inputRef} className="w-5/6">
-            <InputTask listId={listId} setTasks={setTasks} tasks={tasks} closeInput={() => setIsInputOpen(false)} />
-          </div>
-        ) : (
-          <Card className="w-5/6">
-            <CardBody className="flex flex-col gap-6" onClick={() => setIsInputOpen(true)}>
-              <Input
-                isReadOnly
-                placeholder="Add a new Task"
-                startContent={<PlusIcon className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />}
-                type="text"
-                variant="faded"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    setIsInputOpen(true);
-                  }
-                }}
-              />
-            </CardBody>
-          </Card>
-        )}
+        <div ref={inputRef} className="w-5/6">
+          <InputTask listId={listId} setTasks={setTasks} tasks={tasks} />
+        </div>
       </section>
 
       {/* Pass the selected task and isOpen to TaskEditor */}

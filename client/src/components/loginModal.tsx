@@ -14,39 +14,27 @@ export function LoginModal() {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      await loginUser(userName);
-    } catch (error) {
-      console.error("Login failed:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      const response = await fetch("http://localhost:4000/api/user/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: userName,
+        }),
+      });
 
-  const loginUser = async (userName: string) => {
-    fetch("http://localhost:4000/api/user/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: userName,
-      }),
-    })
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          addToast({
-            title: "Invalid Username",
-            description: "The username you entered is not recognized. Please try again or sign up for a new account.",
-            color: "danger",
-          });
-          setErrorMessage("Please enter a valid username.");
-        }
-      })
-      .then((data) => {
+      if (!response.ok) {
+        addToast({
+          title: "Invalid Username",
+          description: "The username you entered is not recognized. Please try again or sign up for a new account.",
+          color: "danger",
+        });
+        setErrorMessage("Please enter a valid username.");
+      } else {
+        const data = await response.json();
         login(data.id, userName);
         addToast({
           title: "Login successful",
@@ -56,16 +44,18 @@ export function LoginModal() {
         navigate("/");
         window.location.reload();
         setUserName("");
-      })
-      .catch((err) => {
-        console.error("Login failed:", err);
-        setErrorMessage("Unable to log in.");
-        addToast({
-          title: "Registration Failed",
-          description: "An error occured while trying to log in. Please try again later.",
-          color: "danger",
-        });
+      }
+    } catch (err) {
+      console.error("Login failed:", err);
+      setErrorMessage("Unable to log in.");
+      addToast({
+        title: "Login Failed",
+        description: "An error occured while trying to log in. Please try again or sign up for a new account.",
+        color: "danger",
       });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
