@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import Cookies from "js-cookie";
+import { socket } from "@/socket";
 
 interface UserContextType {
   userId: string | null;
@@ -41,6 +42,7 @@ export const UserProvider: React.FC<{
     //   });
     // }
     if (storedUserId) {
+      socket.emit("registerUser", storedUserId);  
       setUserId(storedUserId);
       setIsLoggedIn(true);
     } else {

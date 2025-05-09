@@ -3,7 +3,7 @@ const http = require("http");
 const socketIo = require("socket.io");
 const routes = require("./api/index.js");
 const cors = require("cors");
-
+const { db } = require("./initializeDatabase");
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -27,10 +27,16 @@ app.use((req, res, next) => {
 });
 
 app.use("/api", routes);
+const connectedUsers = {};
 
 // WebSocket connection
 io.on("connection", (socket) => {
   console.log("New client connected: " + socket.id);
+
+  socket.on("registerUser", (userId) => {
+    console.log("user "+userId+" registered: " + socket.id);
+    connectedUsers[socket.id] = userId;
+  });
 
   socket.on("joinList", (listId) => {
     socket.join(listId);
@@ -43,7 +49,30 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("Client disconnected: " + socket.id);
+    console.log("Client disconnected:", socket.id);
+    const userId = connectedUsers[socket.id];
+    console.log(userId + " disconnected")
+    if (userId) {
+      // Unlock tasks for this user
+      db.all(
+        "SELECT id, listId FROM tasks WHERE lockedBy = ?",
+        [userId],
+        (err, rows) => {
+          if (!err && rows.length > 0) {
+            rows.forEach((task) => {
+              db.run(
+                "UPDATE tasks SET lockedBy = NULL, lockExpiration = NULL WHERE id = ?",
+                [task.id]
+              );
+              io.to(task.listId).emit("taskUnlocked", {
+                taskId: task.id,
+              });
+            });
+          }
+        }
+      );
+      delete connectedUsers[socket.id];
+    }
   });
 });
 
