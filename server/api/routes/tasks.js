@@ -174,6 +174,8 @@ router.post("/:listId/tasks/:id/unassign", checkUserInList, (req, res) => {
   const { id, listId } = req.params;
   const { userId } = req.body;
   console.log("unassigning task " + id + " from user " + userId);
+
+  // Check if the assignment still exists
   db.get("SELECT * FROM taskAssignments WHERE taskId = ? AND userId = ?", [id, userId], function (err, row) {
     if (err) {
       return res.status(500).json({ error: err.message });
@@ -182,6 +184,7 @@ router.post("/:listId/tasks/:id/unassign", checkUserInList, (req, res) => {
       return res.status(200).json({ taskId: id, userId });
     }
 
+    // Delete the assignment
     db.run("DELETE FROM taskAssignments WHERE taskId = ? AND userId = ?", [id, userId], function (err) {
       if (err) {
         return res.status(500).json({ error: err.message });

@@ -25,6 +25,7 @@ router.post("/register", (req, res) => {
     return res.status(400).json({ message: "Username required" });
   }
 
+  // Check if user already exists
   db.get("SELECT id FROM users WHERE username = ?", [username], (err, row) => {
     if (err) {
       return res.status(500).json({ error: err.message });
@@ -33,6 +34,7 @@ router.post("/register", (req, res) => {
       return res.status(409).json({ message: "User already exists" });
     }
 
+    // Insert new user
     db.run("INSERT INTO users (username) VALUES (?)", [username], function (err) {
       if (err) {
         return res.status(500).json({ error: err.message });
